@@ -1,0 +1,57 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e6]:
+      - img [ref=e8]
+      - generic [ref=e12]: HRMS Pro
+    - navigation [ref=e13]:
+      - list [ref=e14]:
+        - listitem [ref=e15]:
+          - link "Dashboard" [ref=e16] [cursor=pointer]:
+            - /url: /
+            - img [ref=e19]
+            - generic [ref=e24]: Dashboard
+        - listitem [ref=e25]:
+          - link "Employees" [ref=e26] [cursor=pointer]:
+            - /url: /employees
+            - img [ref=e28]
+            - generic [ref=e33]: Employees
+        - listitem [ref=e34]:
+          - link "Departments" [ref=e35] [cursor=pointer]:
+            - /url: /departments
+            - img [ref=e37]
+            - generic [ref=e42]: Departments
+        - listitem [ref=e43]:
+          - link "Attendance" [ref=e44] [cursor=pointer]:
+            - /url: /attendance
+            - img [ref=e46]
+            - generic [ref=e49]: Attendance
+        - listitem [ref=e50]:
+          - link "Salary Calculator" [ref=e51] [cursor=pointer]:
+            - /url: /salary
+            - img [ref=e53]
+            - generic [ref=e55]: Salary Calculator
+        - listitem [ref=e56]:
+          - link "Approvals" [ref=e57] [cursor=pointer]:
+            - /url: /approvals
+            - img [ref=e59]
+            - generic [ref=e62]: Approvals
+    - button "Collapse sidebar" [ref=e63] [cursor=pointer]:
+      - img [ref=e64]
+    - generic [ref=e66]: v1.0.0
+  - generic [ref=e67]:
+    - banner [ref=e68]:
+      - heading "Dashboard" [level=1] [ref=e69]
+      - generic [ref=e70]:
+        - button "EN" [ref=e72] [cursor=pointer]:
+          - img [ref=e73]
+          - generic [ref=e76]: EN
+          - img [ref=e77]
+        - generic [ref=e80]:
+          - generic [ref=e81]: Current Role
+          - combobox [ref=e82] [cursor=pointer]:
+            - option "Employee" [selected]
+            - option "Manager"
+            - option "HR"
+        - generic [ref=e83]: E
+    - main [ref=e84]:
+      - generic [ref=e88]: Loading...

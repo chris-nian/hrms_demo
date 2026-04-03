@@ -1,0 +1,57 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e6]:
+      - img [ref=e8]
+      - generic [ref=e12]: HRMS Pro
+    - navigation [ref=e13]:
+      - list [ref=e14]:
+        - listitem [ref=e15]:
+          - link "数据概览" [ref=e16] [cursor=pointer]:
+            - /url: /
+            - img [ref=e19]
+            - generic [ref=e24]: 数据概览
+        - listitem [ref=e25]:
+          - link "员工管理" [ref=e26] [cursor=pointer]:
+            - /url: /employees
+            - img [ref=e28]
+            - generic [ref=e33]: 员工管理
+        - listitem [ref=e34]:
+          - link "部门管理" [ref=e35] [cursor=pointer]:
+            - /url: /departments
+            - img [ref=e37]
+            - generic [ref=e42]: 部门管理
+        - listitem [ref=e43]:
+          - link "考勤管理" [ref=e44] [cursor=pointer]:
+            - /url: /attendance
+            - img [ref=e46]
+            - generic [ref=e49]: 考勤管理
+        - listitem [ref=e50]:
+          - link "薪酬计算器" [ref=e51] [cursor=pointer]:
+            - /url: /salary
+            - img [ref=e53]
+            - generic [ref=e55]: 薪酬计算器
+        - listitem [ref=e56]:
+          - link "审批中心" [ref=e57] [cursor=pointer]:
+            - /url: /approvals
+            - img [ref=e59]
+            - generic [ref=e62]: 审批中心
+    - button "Collapse sidebar" [ref=e63] [cursor=pointer]:
+      - img [ref=e64]
+    - generic [ref=e66]: v1.0.0
+  - generic [ref=e67]:
+    - banner [ref=e68]:
+      - heading "数据概览" [level=1] [ref=e69]
+      - generic [ref=e70]:
+        - button "中文" [ref=e72] [cursor=pointer]:
+          - img [ref=e73]
+          - generic [ref=e76]: 中文
+          - img [ref=e77]
+        - generic [ref=e80]:
+          - generic [ref=e81]: 当前身份
+          - combobox [ref=e82] [cursor=pointer]:
+            - option "普通员工" [selected]
+            - option "主管"
+            - option "HR"
+        - generic [ref=e83]: E
+    - main [ref=e84]:
+      - generic [ref=e88]: Loading...

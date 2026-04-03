@@ -1,0 +1,264 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ============================================================
+#  HRMS - 人力资源管理系统 管理脚本
+#  Usage: ./hrms.sh {start|stop|restart|status|build|logs|rebuild}
+# ============================================================
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PORT=8000
+PID_FILE="$SCRIPT_DIR/.hrms.pid"
+LOG_FILE="$SCRIPT_DIR/.hrms.log"
+DATA_DIR="$SCRIPT_DIR/data"
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+info()  { echo -e "${BLUE}[INFO]${NC} $*"; }
+ok()    { echo -e "${GREEN}[OK]${NC} $*"; }
+warn()  { echo -e "${YELLOW}[WARN]${NC} $*"; }
+err()   { echo -e "${RED}[ERROR]${NC} $*" >&2; }
+
+check_port() {
+    lsof -ti:$PORT 2>/dev/null || true
+}
+
+is_running() {
+    if [ -f "$PID_FILE" ]; then
+        local pid
+        pid=$(cat "$PID_FILE")
+        if kill -0 "$pid" 2>/dev/null; then
+            return 0
+        fi
+        rm -f "$PID_FILE"
+    fi
+    # Double check via port
+    local pids
+    pids=$(check_port)
+    if [ -n "$pids" ]; then
+        return 0
+    fi
+    return 1
+}
+
+# ─── Install frontend dependencies & build ───
+build_frontend() {
+    info "Installing frontend dependencies..."
+    cd "$SCRIPT_DIR/frontend"
+    npm install --silent 2>&1 | tail -1
+    info "Building frontend..."
+    npm run build 2>&1 | tail -3
+    ok "Frontend built successfully."
+}
+
+# ─── Install backend dependencies ───
+install_backend() {
+    info "Installing backend dependencies..."
+    cd "$SCRIPT_DIR/backend"
+    pip3 install -q -r requirements.txt 2>&1 | tail -1
+    ok "Backend dependencies installed."
+}
+
+# ─── Build everything (fresh) ───
+do_build() {
+    info "Building HRMS from source..."
+    install_backend
+    build_frontend
+    ok "Build complete!"
+}
+
+# ─── Start the server ───
+do_start() {
+    if is_running; then
+        warn "HRMS is already running on port $PORT"
+        info "Access: ${GREEN}http://localhost:$PORT${NC}"
+        return 0
+    fi
+
+    # Ensure frontend is built
+    if [ ! -d "$SCRIPT_DIR/frontend/dist" ]; then
+        warn "Frontend not built yet. Building now..."
+        do_build
+    fi
+
+    # Ensure backend dependencies
+    if ! python3 -c "import fastapi" 2>/dev/null; then
+        warn "Backend dependencies missing. Installing..."
+        install_backend
+    fi
+
+    # Ensure data directory
+    mkdir -p "$DATA_DIR"
+
+    # Start server
+    info "Starting HRMS server on port $PORT..."
+    cd "$SCRIPT_DIR/backend"
+    nohup python3 -m uvicorn main:app \
+        --host 0.0.0.0 \
+        --port $PORT \
+        > "$LOG_FILE" 2>&1 &
+
+    local pid=$!
+    echo "$pid" > "$PID_FILE"
+
+    # Wait for server to be ready
+    local retries=15
+    while [ $retries -gt 0 ]; do
+        if curl -sf "http://localhost:$PORT/api/dashboard/stats" > /dev/null 2>&1; then
+            ok "HRMS is running!"
+            echo ""
+            echo "  ┌─────────────────────────────────────────────┐"
+            echo "  │                                             │"
+            echo "  │   HRMS 人力资源管理系统 已启动               │"
+            echo "  │                                             │"
+            echo "  │   访问地址: http://localhost:$PORT           │"
+            echo "  │   API文档:  http://localhost:$PORT/docs      │"
+            echo "  │                                             │"
+            echo "  │   日志文件: $LOG_FILE     │"
+            echo "  │   停止服务: ./hrms.sh stop                  │"
+            echo "  │                                             │"
+            echo "  └─────────────────────────────────────────────┘"
+            return 0
+        fi
+        retries=$((retries - 1))
+        sleep 1
+    done
+
+    err "Failed to start HRMS. Check log: $LOG_FILE"
+    cat "$LOG_FILE" | tail -20
+    return 1
+}
+
+# ─── Stop the server ───
+do_stop() {
+    if ! is_running; then
+        warn "HRMS is not running."
+        return 0
+    fi
+
+    info "Stopping HRMS..."
+
+    # Try graceful stop via PID file
+    if [ -f "$PID_FILE" ]; then
+        local pid
+        pid=$(cat "$PID_FILE")
+        if kill -0 "$pid" 2>/dev/null; then
+            kill "$pid" 2>/dev/null || true
+        fi
+        rm -f "$PID_FILE"
+    fi
+
+    # Kill any process on the port
+    local pids
+    pids=$(check_port)
+    if [ -n "$pids" ]; then
+        echo "$pids" | xargs kill 2>/dev/null || true
+        sleep 1
+        # Force kill if still running
+        pids=$(check_port)
+        if [ -n "$pids" ]; then
+            echo "$pids" | xargs kill -9 2>/dev/null || true
+        fi
+    fi
+
+    ok "HRMS stopped."
+}
+
+# ─── Restart ───
+do_restart() {
+    info "Restarting HRMS..."
+    do_stop
+    sleep 1
+    do_start
+}
+
+# ─── Rebuild & Restart (use latest code) ───
+do_rebuild() {
+    info "Rebuilding HRMS with latest code..."
+    do_stop
+    sleep 1
+    rm -rf "$SCRIPT_DIR/frontend/dist"
+    do_build
+    echo ""
+    do_start
+}
+
+# ─── Status ───
+do_status() {
+    echo "HRMS Status:"
+    echo "──────────────────────────────────"
+    if is_running; then
+        local pid
+        pid=$(cat "$PID_FILE" 2>/dev/null || check_port)
+        echo -e "  Status:  ${GREEN}RUNNING${NC} (PID: $pid)"
+        echo "  URL:     http://localhost:$PORT"
+        echo "  API:     http://localhost:$PORT/docs"
+        echo "  Log:     $LOG_FILE"
+
+        # Quick health check
+        local response
+        response=$(curl -sf "http://localhost:$PORT/api/dashboard/stats" 2>/dev/null || echo "")
+        if [ -n "$response" ]; then
+            local employees
+            employees=$(echo "$response" | python3 -c "import sys,json; print(json.load(sys.stdin)['total_employees'])" 2>/dev/null || echo "?")
+            echo "  Employees in DB: $employees"
+        fi
+    else
+        echo -e "  Status:  ${RED}STOPPED${NC}"
+    fi
+
+    # Check if build exists
+    if [ -d "$SCRIPT_DIR/frontend/dist" ]; then
+        echo -e "  Build:   ${GREEN}READY${NC} (frontend/dist exists)"
+    else
+        echo -e "  Build:   ${YELLOW}NOT BUILT${NC} (run ./hrms.sh build)"
+    fi
+    echo "──────────────────────────────────"
+}
+
+# ─── Logs ───
+do_logs() {
+    if [ -f "$LOG_FILE" ]; then
+        tail -f "$LOG_FILE"
+    else
+        warn "No log file found at $LOG_FILE"
+    fi
+}
+
+# ─── Help ───
+do_help() {
+    echo "HRMS - 人力资源管理系统 管理脚本"
+    echo ""
+    echo "Usage: ./hrms.sh <command>"
+    echo ""
+    echo "Commands:"
+    echo "  start     Start the server (auto-build if needed)"
+    echo "  stop      Stop the server"
+    echo "  restart   Stop then start"
+    echo "  rebuild   Rebuild from latest source code and start (use after code changes)"
+    echo "  build     Build frontend & install dependencies without starting"
+    echo "  status    Show server status and health check"
+    echo "  logs      Tail the server log file"
+    echo ""
+}
+
+# ─── Main ───
+case "${1:-}" in
+    start)    do_start ;;
+    stop)     do_stop ;;
+    restart)  do_restart ;;
+    rebuild)  do_rebuild ;;
+    build)    do_build ;;
+    status)   do_status ;;
+    logs)     do_logs ;;
+    help|--help|-h) do_help ;;
+    *)
+        err "Unknown command: ${1:-}"
+        do_help
+        exit 1
+        ;;
+esac

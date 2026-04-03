@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/i18n.ts","./src/main.tsx","./src/api/index.ts","./src/components/layout.tsx","./src/components/ui.tsx","./src/pages/approvals.tsx","./src/pages/attendance.tsx","./src/pages/dashboard.tsx","./src/pages/departments.tsx","./src/pages/employees.tsx","./src/pages/salary.tsx","./src/stores/appstore.ts"],"version":"5.7.3"}

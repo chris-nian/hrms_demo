@@ -1,0 +1,127 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e6]:
+      - img [ref=e8]
+      - generic [ref=e12]: HRMS Pro
+    - navigation [ref=e13]:
+      - list [ref=e14]:
+        - listitem [ref=e15]:
+          - link "数据概览" [ref=e16] [cursor=pointer]:
+            - /url: /
+            - img [ref=e19]
+            - generic [ref=e24]: 数据概览
+        - listitem [ref=e25]:
+          - link "员工管理" [ref=e26] [cursor=pointer]:
+            - /url: /employees
+            - img [ref=e28]
+            - generic [ref=e33]: 员工管理
+        - listitem [ref=e34]:
+          - link "部门管理" [ref=e35] [cursor=pointer]:
+            - /url: /departments
+            - img [ref=e37]
+            - generic [ref=e42]: 部门管理
+        - listitem [ref=e43]:
+          - link "考勤管理" [ref=e44] [cursor=pointer]:
+            - /url: /attendance
+            - img [ref=e46]
+            - generic [ref=e49]: 考勤管理
+        - listitem [ref=e50]:
+          - link "薪酬计算器" [ref=e51] [cursor=pointer]:
+            - /url: /salary
+            - img [ref=e53]
+            - generic [ref=e55]: 薪酬计算器
+        - listitem [ref=e56]:
+          - link "审批中心" [ref=e57] [cursor=pointer]:
+            - /url: /approvals
+            - img [ref=e59]
+            - generic [ref=e62]: 审批中心
+    - button "Collapse sidebar" [ref=e63] [cursor=pointer]:
+      - img [ref=e64]
+    - generic [ref=e66]: v1.0.0
+  - generic [ref=e67]:
+    - banner [ref=e68]:
+      - heading "数据概览" [level=1] [ref=e69]
+      - generic [ref=e70]:
+        - button "中文" [ref=e72] [cursor=pointer]:
+          - img [ref=e73]
+          - generic [ref=e76]: 中文
+          - img [ref=e77]
+        - generic [ref=e80]:
+          - generic [ref=e81]: 当前身份
+          - combobox [ref=e82] [cursor=pointer]:
+            - option "普通员工" [selected]
+            - option "主管"
+            - option "HR"
+        - generic [ref=e83]: E
+    - main [ref=e84]:
+      - generic [ref=e85]:
+        - generic [ref=e86]:
+          - heading "数据概览" [level=1] [ref=e87]
+          - paragraph [ref=e88]: 最近审批
+        - generic [ref=e89]:
+          - generic [ref=e90]:
+            - img [ref=e92]
+            - generic [ref=e94]:
+              - generic [ref=e95]: "16"
+              - generic [ref=e96]: 员工总数
+          - generic [ref=e97]:
+            - img [ref=e99]
+            - generic [ref=e101]:
+              - generic [ref=e102]: "16"
+              - generic [ref=e103]: 在职员工
+          - generic [ref=e104]:
+            - img [ref=e106]
+            - generic [ref=e108]:
+              - generic [ref=e109]: 81.2%
+              - generic [ref=e110]: 出勤率
+          - generic [ref=e111]:
+            - img [ref=e113]
+            - generic [ref=e115]:
+              - generic [ref=e116]: "2"
+              - generic [ref=e117]: 待审批
+        - generic [ref=e118]:
+          - heading "最近审批" [level=2] [ref=e119]
+          - table [ref=e121]:
+            - rowgroup [ref=e122]:
+              - row "姓名 类型 申请人 状态 日期" [ref=e123]:
+                - columnheader "姓名" [ref=e124]
+                - columnheader "类型" [ref=e125]
+                - columnheader "申请人" [ref=e126]
+                - columnheader "状态" [ref=e127]
+                - columnheader "日期" [ref=e128]
+            - rowgroup [ref=e129]:
+              - row "请假申请 - 事假1天 请假申请 王磊 待主管审批 2026/4/1 14:13" [ref=e130]:
+                - cell "请假申请 - 事假1天" [ref=e131]
+                - cell "请假申请" [ref=e132]
+                - cell "王磊" [ref=e133]
+                - cell "待主管审批" [ref=e134]:
+                  - generic [ref=e135]: 待主管审批
+                - cell "2026/4/1 14:13" [ref=e136]
+              - row "请假申请 - 病假2天 请假申请 杨帆 已驳回 2026/3/31 14:13" [ref=e137]:
+                - cell "请假申请 - 病假2天" [ref=e138]
+                - cell "请假申请" [ref=e139]
+                - cell "杨帆" [ref=e140]
+                - cell "已驳回" [ref=e141]:
+                  - generic [ref=e142]: 已驳回
+                - cell "2026/3/31 14:13" [ref=e143]
+              - row "薪资调整申请 approval.salary_adjust 李强 待HR审批 2026/3/29 14:13" [ref=e144]:
+                - cell "薪资调整申请" [ref=e145]
+                - cell "approval.salary_adjust" [ref=e146]
+                - cell "李强" [ref=e147]
+                - cell "待HR审批" [ref=e148]:
+                  - generic [ref=e149]: 待HR审批
+                - cell "2026/3/29 14:13" [ref=e150]
+              - row "设备采购申请 其他申请 陈刚 已通过 2026/3/25 14:13" [ref=e151]:
+                - cell "设备采购申请" [ref=e152]
+                - cell "其他申请" [ref=e153]
+                - cell "陈刚" [ref=e154]
+                - cell "已通过" [ref=e155]:
+                  - generic [ref=e156]: 已通过
+                - cell "2026/3/25 14:13" [ref=e157]
+              - row "请假申请 - 年假3天 请假申请 张伟 已通过 2026/3/23 14:13" [ref=e158]:
+                - cell "请假申请 - 年假3天" [ref=e159]
+                - cell "请假申请" [ref=e160]
+                - cell "张伟" [ref=e161]
+                - cell "已通过" [ref=e162]:
+                  - generic [ref=e163]: 已通过
+                - cell "2026/3/23 14:13" [ref=e164]

@@ -1,0 +1,105 @@
+- generic [ref=e3]:
+  - complementary [ref=e4]:
+    - generic [ref=e6]:
+      - img [ref=e8]
+      - generic [ref=e12]: HRMS Pro
+    - navigation [ref=e13]:
+      - list [ref=e14]:
+        - listitem [ref=e15]:
+          - link "数据概览" [ref=e16] [cursor=pointer]:
+            - /url: /
+            - img [ref=e18]
+            - generic [ref=e23]: 数据概览
+        - listitem [ref=e24]:
+          - link "员工管理" [ref=e25] [cursor=pointer]:
+            - /url: /employees
+            - img [ref=e27]
+            - generic [ref=e32]: 员工管理
+        - listitem [ref=e33]:
+          - link "部门管理" [ref=e34] [cursor=pointer]:
+            - /url: /departments
+            - img [ref=e36]
+            - generic [ref=e41]: 部门管理
+        - listitem [ref=e42]:
+          - link "考勤管理" [ref=e43] [cursor=pointer]:
+            - /url: /attendance
+            - img [ref=e45]
+            - generic [ref=e48]: 考勤管理
+        - listitem [ref=e49]:
+          - link "薪酬计算器" [ref=e50] [cursor=pointer]:
+            - /url: /salary
+            - img [ref=e53]
+            - generic [ref=e55]: 薪酬计算器
+        - listitem [ref=e56]:
+          - link "审批中心" [ref=e57] [cursor=pointer]:
+            - /url: /approvals
+            - img [ref=e59]
+            - generic [ref=e62]: 审批中心
+    - button "Collapse sidebar" [ref=e63] [cursor=pointer]:
+      - img [ref=e64]
+    - generic [ref=e66]: v1.0.0
+  - generic [ref=e67]:
+    - banner [ref=e68]:
+      - heading "薪酬计算器" [level=1] [ref=e69]
+      - generic [ref=e70]:
+        - button "中文" [ref=e72] [cursor=pointer]:
+          - img [ref=e73]
+          - generic [ref=e76]: 中文
+          - img [ref=e77]
+        - generic [ref=e80]:
+          - generic [ref=e81]: 当前身份
+          - combobox [ref=e82] [cursor=pointer]:
+            - option "普通员工" [selected]
+            - option "主管"
+            - option "HR"
+        - generic [ref=e83]: E
+    - main [ref=e84]:
+      - generic [ref=e85]:
+        - generic [ref=e86]:
+          - generic [ref=e87]:
+            - heading "薪酬计算器" [level=1] [ref=e88]
+            - paragraph [ref=e89]: 工资构成
+          - button "导出工资条" [disabled] [ref=e90]:
+            - img [ref=e91]
+            - text: 导出工资条
+        - generic [ref=e93]:
+          - generic [ref=e95]:
+            - generic [ref=e96]:
+              - generic [ref=e97]: 选择员工 *
+              - combobox [ref=e98]:
+                - option "-- 选择员工 --" [selected]
+            - generic [ref=e99]:
+              - generic [ref=e100]: 基本工资
+              - generic [ref=e101]:
+                - generic [ref=e102]: ¥
+                - spinbutton [ref=e103]
+            - generic [ref=e104]:
+              - generic [ref=e105]:
+                - generic [ref=e106]: 奖金
+                - generic [ref=e107]:
+                  - generic [ref=e108]: ¥
+                  - spinbutton [ref=e109]
+              - generic [ref=e110]:
+                - generic [ref=e111]: 扣款
+                - generic [ref=e112]:
+                  - generic [ref=e113]: ¥
+                  - spinbutton [ref=e114]
+            - generic [ref=e115]:
+              - generic [ref=e116]:
+                - generic [ref=e117]: 公积金比例
+                - generic [ref=e118]: 7%
+              - slider [ref=e119] [cursor=pointer]: "7"
+              - generic [ref=e120]:
+                - generic [ref=e121]: 5%
+                - generic [ref=e122]: 12%
+            - generic [ref=e123]:
+              - generic [ref=e124]:
+                - generic [ref=e125]: 社保比例
+                - generic [ref=e126]: 10.5%
+              - slider [ref=e127] [cursor=pointer]: "10.5"
+              - generic [ref=e128]:
+                - generic [ref=e129]: 8%
+                - generic [ref=e130]: 12%
+          - generic [ref=e132]:
+            - img [ref=e133]
+            - paragraph [ref=e135]: 选择员工
