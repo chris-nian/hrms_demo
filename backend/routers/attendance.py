@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Query
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from database import get_db
 from models import Attendance, Employee
@@ -19,7 +20,7 @@ def list_attendance(
     if employee_id:
         query = query.filter(Attendance.employee_id == employee_id)
     if month:
-        query = query.filter(Attendance.date.strftime("%Y-%m") == month)
+        query = query.filter(func.strftime("%Y-%m", Attendance.date) == month)
     total = query.count()
     items = query.order_by(Attendance.date.desc()).offset((page - 1) * page_size).limit(page_size).all()
     result = []
@@ -37,7 +38,7 @@ def list_attendance(
 def attendance_stats(month: str | None = None, db: Session = Depends(get_db)):
     query = db.query(Attendance)
     if month:
-        query = query.filter(Attendance.date.strftime("%Y-%m") == month)
+        query = query.filter(func.strftime("%Y-%m", Attendance.date) == month)
     records = query.all()
     total = len(records)
     normal = sum(1 for r in records if r.status == "normal")
