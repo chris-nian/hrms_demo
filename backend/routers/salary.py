@@ -24,6 +24,13 @@ def get_salary_config(employee_id: int, db: Session = Depends(get_db)):
 
 @router.put("/config/{employee_id}", response_model=SalaryConfigOut)
 def update_salary_config(employee_id: int, data: SalaryConfigUpdate, db: Session = Depends(get_db)):
+    emp = db.query(Employee).filter(Employee.id == employee_id).first()
+    if not emp:
+        raise HTTPException(404, "Employee not found")
+    if data.base_salary < 0 or data.bonus < 0 or data.deduction < 0:
+        raise HTTPException(400, "Salary values cannot be negative")
+    if not 0 <= data.housing_fund_rate <= 0.3 or not 0 <= data.social_insurance_rate <= 0.3:
+        raise HTTPException(400, "Contribution rates are out of range")
     config = db.query(SalaryConfig).filter(SalaryConfig.employee_id == employee_id).first()
     if not config:
         config = SalaryConfig(employee_id=employee_id, **data.model_dump())
@@ -38,6 +45,10 @@ def update_salary_config(employee_id: int, data: SalaryConfigUpdate, db: Session
 
 @router.post("/calculate", response_model=SalaryCalculateResult)
 def calculate(req: SalaryCalculateRequest):
+    if req.base_salary < 0 or req.bonus < 0 or req.deduction < 0:
+        raise HTTPException(400, "Salary values cannot be negative")
+    if not 0 <= req.housing_fund_rate <= 0.3 or not 0 <= req.social_insurance_rate <= 0.3:
+        raise HTTPException(400, "Contribution rates are out of range")
     result = calculate_salary(
         base_salary=req.base_salary,
         bonus=req.bonus,

@@ -10,7 +10,9 @@ class TestPositionsAPI:
         response = client.get("/api/positions")
         assert response.status_code == 200
         data = response.json()
-        assert isinstance(data, list)
+        assert "total" in data
+        assert "items" in data
+        assert isinstance(data["items"], list)
 
     def test_list_positions_by_department(self, client: TestClient, sample_department_data):
         """测试按部门筛选职位列表"""
@@ -31,7 +33,7 @@ class TestPositionsAPI:
         # 按部门查询
         response = client.get(f"/api/positions?department_id={dept_id}")
         assert response.status_code == 200
-        data = response.json()
+        data = response.json()["items"]
         assert len(data) >= 1
         assert data[0]["department_id"] == dept_id
 

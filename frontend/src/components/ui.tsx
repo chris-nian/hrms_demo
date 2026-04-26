@@ -14,13 +14,12 @@ interface PageHeaderProps {
 
 export function PageHeader({ eyebrow, title, description, actions, meta }: PageHeaderProps) {
   return (
-    <section className="surface-panel relative overflow-hidden p-7 md:p-8">
-      <div className="absolute inset-y-0 right-0 hidden w-1/3 bg-[radial-gradient(circle_at_top_right,rgba(87,123,255,0.16),transparent_68%)] md:block" />
-      <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+    <section className="surface-panel p-6 md:p-7">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl space-y-3">
           {eyebrow && <div className="section-kicker">{eyebrow}</div>}
           <div className="space-y-2">
-            <h2 className="text-[clamp(1.8rem,3vw,2.6rem)] font-semibold tracking-[-0.04em] text-[var(--text-primary)]">
+            <h2 className="text-3xl font-semibold text-[var(--text-primary)]">
               {title}
             </h2>
             <p className="max-w-2xl text-[15px] leading-7 text-[var(--text-secondary)]">
@@ -51,7 +50,7 @@ export function Panel({ title, description, action, children, className }: Panel
       {(title || description || action) && (
         <div className="mb-5 flex flex-col gap-3 border-b border-[var(--border)] pb-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-1">
-            {title && <h3 className="text-lg font-semibold tracking-[-0.02em] text-[var(--text-primary)]">{title}</h3>}
+            {title && <h3 className="text-lg font-semibold text-[var(--text-primary)]">{title}</h3>}
             {description && <p className="text-sm leading-6 text-[var(--text-secondary)]">{description}</p>}
           </div>
           {action}
@@ -71,22 +70,22 @@ interface StatCardProps {
 }
 
 const toneClassMap: Record<NonNullable<StatCardProps['tone']>, string> = {
-  blue: 'from-blue-500/14 via-indigo-500/10 to-transparent text-blue-700',
-  green: 'from-emerald-500/14 via-teal-500/10 to-transparent text-emerald-700',
-  amber: 'from-amber-500/16 via-orange-500/10 to-transparent text-amber-700',
-  rose: 'from-rose-500/16 via-pink-500/10 to-transparent text-rose-700',
-  slate: 'from-slate-500/14 via-slate-400/10 to-transparent text-slate-700',
+  blue: 'bg-blue-50 text-blue-700',
+  green: 'bg-emerald-50 text-emerald-700',
+  amber: 'bg-amber-50 text-amber-700',
+  rose: 'bg-rose-50 text-rose-700',
+  slate: 'bg-slate-100 text-slate-700',
 }
 
 export function StatCard({ label, value, hint, icon, tone = 'blue' }: StatCardProps) {
   return (
     <div className="metric-card">
-      <div className={cx('metric-card__icon bg-gradient-to-br', toneClassMap[tone])}>
+      <div className={cx('metric-card__icon', toneClassMap[tone])}>
         {icon}
       </div>
       <div className="min-w-0 space-y-1">
         <div className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)]">{label}</div>
-        <div className="text-[clamp(1.5rem,2vw,2.2rem)] font-semibold tracking-[-0.05em] text-[var(--text-primary)]">
+        <div className="text-3xl font-semibold text-[var(--text-primary)]">
           {value}
         </div>
         {hint && <div className="text-sm text-[var(--text-secondary)]">{hint}</div>}
@@ -106,7 +105,7 @@ export function EmptyState({ title, description, icon }: EmptyStateProps) {
     <div className="empty-state">
       {icon}
       <div className="space-y-2">
-        <h4 className="text-lg font-semibold tracking-[-0.02em] text-[var(--text-primary)]">{title}</h4>
+        <h4 className="text-lg font-semibold text-[var(--text-primary)]">{title}</h4>
         {description && <p className="mx-auto max-w-md text-sm leading-6 text-[var(--text-secondary)]">{description}</p>}
       </div>
     </div>
@@ -144,7 +143,7 @@ export function ModalShell({
       <div className={cx('modal-card', maxWidthClassName)}>
         <div className="flex items-start justify-between gap-4 border-b border-[var(--border)] px-6 py-5">
           <div className="space-y-1">
-            <h3 className="text-xl font-semibold tracking-[-0.03em] text-[var(--text-primary)]">{title}</h3>
+            <h3 className="text-xl font-semibold text-[var(--text-primary)]">{title}</h3>
             {subtitle && <p className="text-sm leading-6 text-[var(--text-secondary)]">{subtitle}</p>}
           </div>
           <button type="button" onClick={onClose} className="icon-button">

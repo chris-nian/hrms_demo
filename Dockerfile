@@ -9,6 +9,8 @@ RUN npm run build
 # Stage 2: Python backend
 FROM python:3.12-slim
 WORKDIR /app
+ENV HRMS_DATA_DIR=/app/data
+ENV HRMS_FRONTEND_DIST=/app/frontend/dist
 
 # Install backend dependencies
 COPY backend/requirements.txt .

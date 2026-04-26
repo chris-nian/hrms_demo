@@ -2,6 +2,7 @@ import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAppStore } from '@/stores/appStore'
+import type { Role } from '@/api/index'
 import '@/i18n'
 
 interface NavItem {
@@ -146,14 +147,12 @@ export default function Layout() {
         className="relative hidden shrink-0 flex-col px-4 py-5 text-white md:flex"
         style={{
           width: isCollapsed ? 'var(--sidebar-collapsed)' : 'var(--sidebar-width)',
-          background: 'linear-gradient(180deg, #0d1424 0%, #101a2f 48%, #0a1220 100%)',
+          background: '#071426',
           transition: 'width 0.22s ease',
         }}
       >
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top,rgba(87,123,255,0.28),transparent_62%)]" />
-
-        <div className="relative flex min-h-[56px] items-center gap-3 overflow-hidden rounded-[22px] border border-white/10 bg-white/5 px-3.5">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#5d83ff,#3ed3c5)] shadow-[0_12px_24px_rgba(87,123,255,0.28)]">
+        <div className="relative flex min-h-[56px] items-center gap-3 overflow-hidden rounded-lg border border-white/10 bg-white/5 px-3.5">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-blue-700">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M12 3 3 7.8l9 4.8 9-4.8L12 3Z" fill="white" fillOpacity="0.95" />
               <path d="M4.5 12.8 12 17l7.5-4.2" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" opacity="0.85" />
@@ -162,7 +161,7 @@ export default function Layout() {
           </div>
             {!isCollapsed && (
               <div className="min-w-0">
-                <div className="text-[1.05rem] font-semibold tracking-[-0.04em] text-white">HRMS</div>
+                <div className="text-[1.05rem] font-semibold text-white">HRMS</div>
                 <div className="text-xs uppercase tracking-[0.22em] text-slate-400">{isZh ? '人力运营' : 'People Ops'}</div>
               </div>
             )}
@@ -182,15 +181,16 @@ export default function Layout() {
                   key={item.path}
                   to={item.path}
                   title={isCollapsed ? t(item.titleKey) : undefined}
-                  className="group relative flex items-center gap-3 overflow-hidden rounded-[22px] px-3 py-3 text-sm font-medium transition-all"
+                  className="group relative flex items-center gap-3 overflow-hidden rounded-lg px-3 py-3 text-sm font-medium transition-all"
+                  aria-current={active ? 'page' : undefined}
                   style={{
                     color: active ? '#ffffff' : 'rgba(203,213,225,0.78)',
-                    background: active ? 'linear-gradient(135deg, rgba(87,123,255,0.22), rgba(62,211,197,0.14))' : 'transparent',
+                    background: active ? 'rgba(29,78,216,0.28)' : 'transparent',
                     border: active ? '1px solid rgba(87,123,255,0.22)' : '1px solid transparent',
                   }}
                 >
-                  {active && <span className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full bg-[linear-gradient(180deg,#7aa1ff,#3ed3c5)]" />}
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/6 text-current transition-colors group-hover:bg-white/10">
+                  {active && <span className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full bg-blue-300" />}
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/6 text-current transition-colors group-hover:bg-white/10">
                     {item.icon}
                   </span>
                   {!isCollapsed && (
@@ -207,7 +207,7 @@ export default function Layout() {
         <button
           type="button"
           onClick={toggleSidebar}
-          className="relative mt-5 inline-flex h-12 items-center justify-center rounded-[18px] border border-white/10 bg-white/6 text-slate-200 transition hover:bg-white/10"
+          className="relative mt-5 inline-flex h-12 items-center justify-center rounded-lg border border-white/10 bg-white/6 text-slate-200 transition hover:bg-white/10"
         >
           <svg
             className="h-5 w-5 transition-transform"
@@ -229,20 +229,19 @@ export default function Layout() {
           className="sticky top-0 z-30 flex items-center justify-between px-5 md:px-8"
           style={{
             minHeight: 'var(--header-height)',
-            backdropFilter: 'blur(18px)',
-            background: 'rgba(246, 248, 253, 0.72)',
+            background: '#f8fafc',
             borderBottom: '1px solid rgba(21,32,51,0.06)',
           }}
         >
           <div className="space-y-1">
             <div className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">{t('common.overview')}</div>
-            <div className="text-[1.4rem] font-semibold tracking-[-0.04em] text-[var(--text-primary)]">{t(pageTitleKey)}</div>
+            <div className="text-[1.4rem] font-semibold text-[var(--text-primary)]">{t(pageTitleKey)}</div>
             <div className="hidden text-sm text-[var(--text-secondary)] lg:block">{t(subtitleKey)}</div>
           </div>
 
           <div className="flex items-center gap-2 md:gap-3">
             <div className="relative" ref={dropdownRef}>
-              <button type="button" className="pill" onClick={() => setLangDropdownOpen((value) => !value)}>
+              <button type="button" className="pill" aria-expanded={langDropdownOpen} onClick={() => setLangDropdownOpen((value) => !value)}>
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="9" />
                   <path d="M3 12h18" />
@@ -251,7 +250,7 @@ export default function Layout() {
                 <span>{currentLang === 'zh' ? '中文' : 'EN'}</span>
               </button>
               {langDropdownOpen && (
-                <div className="absolute right-0 top-[calc(100%+0.5rem)] min-w-[9rem] rounded-[20px] border border-[var(--border)] bg-[rgba(255,255,255,0.96)] p-1.5 shadow-[var(--shadow-card)]">
+                <div className="absolute right-0 top-[calc(100%+0.5rem)] min-w-[9rem] rounded-lg border border-[var(--border)] bg-white p-1.5 shadow-[var(--shadow-card)]">
                   {[
                     { code: 'zh', label: '中文' },
                     { code: 'en', label: 'English' },
@@ -260,7 +259,7 @@ export default function Layout() {
                       key={lang.code}
                       type="button"
                       onClick={() => setLanguage(lang.code)}
-                      className="flex w-full items-center justify-between rounded-2xl px-3 py-2 text-sm text-[var(--text-secondary)] transition hover:bg-[rgba(87,123,255,0.08)] hover:text-[var(--text-primary)]"
+                      className="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm text-[var(--text-secondary)] transition hover:bg-blue-50 hover:text-[var(--text-primary)]"
                     >
                       {lang.label}
                       {currentLang === lang.code && <span className="text-[var(--accent-strong)]">●</span>}
@@ -274,7 +273,7 @@ export default function Layout() {
               <span className="hidden text-[var(--text-muted)] md:inline">{t('approval.currentRole')}</span>
               <select
                 value={currentRole}
-                onChange={(event) => setCurrentRole(event.target.value)}
+                onChange={(event) => setCurrentRole(event.target.value as Role)}
                 className="border-0 bg-transparent pr-1 text-sm font-semibold text-[var(--text-primary)] outline-none"
               >
                 {roles.map((role) => (
@@ -285,8 +284,8 @@ export default function Layout() {
               </select>
             </div>
 
-            <div className="hidden items-center gap-3 rounded-full border border-[var(--border)] bg-white/80 px-3 py-2 md:flex">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[linear-gradient(135deg,#5d83ff,#3ed3c5)] text-sm font-semibold text-white">
+            <div className="hidden items-center gap-3 rounded-lg border border-[var(--border)] bg-white px-3 py-2 md:flex">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-700 text-sm font-semibold text-white">
                 {currentRole === 'hr' ? 'HR' : currentRole === 'manager' ? 'MG' : 'EM'}
               </div>
               <div>
@@ -298,6 +297,27 @@ export default function Layout() {
             </div>
           </div>
         </header>
+
+        <nav className="flex gap-2 overflow-x-auto border-b border-[var(--border)] bg-white px-4 py-3 md:hidden">
+          {navItems.map((item) => {
+            const active = isActive(item.path)
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                aria-current={active ? 'page' : undefined}
+                className={`inline-flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold ${
+                  active
+                    ? 'border-blue-200 bg-blue-50 text-blue-700'
+                    : 'border-[var(--border)] bg-white text-[var(--text-secondary)]'
+                }`}
+              >
+                {item.icon}
+                {t(item.titleKey)}
+              </Link>
+            )
+          })}
+        </nav>
 
         <main className="flex-1 overflow-auto px-4 py-5 md:px-7 md:py-7">
           <div className="page-enter mx-auto w-full max-w-[1460px]">

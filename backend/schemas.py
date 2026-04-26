@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import Optional
 
 
@@ -7,6 +7,8 @@ from typing import Optional
 class DepartmentBase(BaseModel):
     name: str
     description: Optional[str] = None
+    manager_id: Optional[int] = None
+    headcount_plan: int = 0
 
 class DepartmentCreate(DepartmentBase):
     pass
@@ -18,6 +20,7 @@ class DepartmentOut(DepartmentBase):
     id: int
     created_at: datetime
     employee_count: int = 0
+    manager_name: str = ""
 
     class Config:
         from_attributes = True
@@ -28,6 +31,8 @@ class PositionBase(BaseModel):
     title: str
     department_id: int
     level: Optional[str] = None
+    description: Optional[str] = None
+    headcount_plan: int = 0
 
 class PositionCreate(PositionBase):
     pass
@@ -39,6 +44,7 @@ class PositionOut(PositionBase):
     id: int
     created_at: datetime
     department_name: str = ""
+    employee_count: int = 0
 
     class Config:
         from_attributes = True
@@ -46,6 +52,7 @@ class PositionOut(PositionBase):
 
 # ─── Employee ───
 class EmployeeBase(BaseModel):
+    employee_no: Optional[str] = None
     name: str
     email: Optional[str] = None
     phone: Optional[str] = None
@@ -53,9 +60,22 @@ class EmployeeBase(BaseModel):
     avatar: Optional[str] = None
     department_id: Optional[int] = None
     position_id: Optional[int] = None
+    manager_id: Optional[int] = None
+    work_location: Optional[str] = None
+    employment_type: str = "full_time"
+    contract_end_date: Optional[date] = None
+    emergency_contact: Optional[str] = None
+    emergency_phone: Optional[str] = None
     hire_date: Optional[date] = None
     status: str = "active"
     role: str = "employee"
+
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, value: Optional[str]) -> Optional[str]:
+        if value and ("@" not in value or "." not in value.split("@")[-1]):
+            raise ValueError("Invalid email format")
+        return value
 
 class EmployeeCreate(EmployeeBase):
     pass
@@ -68,6 +88,9 @@ class EmployeeOut(EmployeeBase):
     created_at: datetime
     department_name: str = ""
     position_title: str = ""
+    manager_name: str = ""
+    base_salary: float | None = None
+    recent_attendance_status: str = ""
 
     class Config:
         from_attributes = True
@@ -82,6 +105,9 @@ class AttendanceBase(BaseModel):
     status: str = "normal"
 
 class AttendanceCreate(AttendanceBase):
+    pass
+
+class AttendanceUpdate(AttendanceBase):
     pass
 
 class AttendanceOut(AttendanceBase):
@@ -131,6 +157,7 @@ class SalaryCalculateResult(BaseModel):
 class ApprovalFlowCreate(BaseModel):
     title: str
     type: str  # leave/salary_adjust/other
+    applicant_id: int
     content: Optional[dict] = None
 
 class ApprovalAction(BaseModel):
@@ -171,7 +198,14 @@ class ApprovalFlowOut(BaseModel):
 class DashboardStats(BaseModel):
     total_employees: int
     active_employees: int
+    inactive_employees: int
     attendance_rate: float
+    abnormal_attendance_count: int
     pending_approvals: int
     department_count: int
+    position_count: int
+    contracts_expiring_30: int
+    contracts_expiring_60: int
+    salary_config_coverage: float
+    department_distribution: list[dict]
     recent_approvals: list[ApprovalFlowOut]

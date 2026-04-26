@@ -15,6 +15,6 @@ describe('Layout', () => {
       </BrowserRouter>
     )
 
-    expect(screen.getByTestId('test-content')).toBeInTheDocument()
+    expect(screen.getByTestId('test-content')).toBeTruthy()
   })
 })

@@ -3,20 +3,43 @@ import pytest_asyncio
 from typing import AsyncGenerator, Generator
 from fastapi.testclient import TestClient
 from httpx import AsyncClient, ASGITransport
+from sqlalchemy import text
 
 import sys
 import os
+import tempfile
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+os.environ["HRMS_DATA_DIR"] = tempfile.mkdtemp(prefix="hrms-test-")
 
 from main import app
 from database import SessionLocal, engine, Base
 from models import Employee, Department, Position, Attendance, SalaryConfig, ApprovalFlow, ApprovalRecord
+from seed import seed
+
+
+def reset_test_database():
+    with engine.begin() as connection:
+        connection.execute(text("PRAGMA foreign_keys=OFF"))
+        for table in [
+            "approval_records",
+            "approval_flows",
+            "attendances",
+            "salary_configs",
+            "employees",
+            "positions",
+            "departments",
+        ]:
+            connection.execute(text(f"DROP TABLE IF EXISTS {table}"))
+        connection.execute(text("PRAGMA foreign_keys=ON"))
+    Base.metadata.create_all(bind=engine)
+    seed()
 
 
 # 同步测试客户端
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def client() -> Generator:
     """同步测试客户端"""
+    reset_test_database()
     with TestClient(app) as c:
         yield c
 
@@ -25,6 +48,7 @@ def client() -> Generator:
 @pytest_asyncio.fixture(scope="function")
 async def async_client() -> AsyncGenerator:
     """异步测试客户端"""
+    reset_test_database()
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac

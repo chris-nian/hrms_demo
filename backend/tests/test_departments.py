@@ -10,7 +10,9 @@ class TestDepartmentsAPI:
         response = client.get("/api/departments")
         assert response.status_code == 200
         data = response.json()
-        assert isinstance(data, list)
+        assert "total" in data
+        assert "items" in data
+        assert isinstance(data["items"], list)
 
     def test_create_and_update_department(self, client: TestClient, sample_department_data):
         """测试创建和更新部门"""

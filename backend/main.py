@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from database import engine, Base
+from database import engine, Base, upgrade_sqlite_schema
 from routers import departments, positions, employees, attendance, salary, approvals, dashboard
 from seed import seed
 
@@ -12,6 +12,7 @@ app = FastAPI(title="HRMS API", version="1.0.0")
 
 # Create tables and seed data
 Base.metadata.create_all(bind=engine)
+upgrade_sqlite_schema()
 seed()
 
 # API routers
@@ -24,7 +25,10 @@ app.include_router(approvals.router)
 app.include_router(dashboard.router)
 
 # Serve React static files
-frontend_dist = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend", "dist")
+frontend_dist = os.environ.get(
+    "HRMS_FRONTEND_DIST",
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend", "dist"),
+)
 if os.path.isdir(frontend_dist):
     app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dist, "assets")), name="assets")
 

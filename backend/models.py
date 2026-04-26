@@ -10,10 +10,13 @@ class Department(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    manager_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("employees.id"), nullable=True)
+    headcount_plan: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    employees: Mapped[list["Employee"]] = relationship(back_populates="department")
+    employees: Mapped[list["Employee"]] = relationship(back_populates="department", foreign_keys="Employee.department_id")
     positions: Mapped[list["Position"]] = relationship(back_populates="department")
+    manager: Mapped["Employee | None"] = relationship(foreign_keys=[manager_id])
 
 
 class Position(Base):
@@ -23,6 +26,8 @@ class Position(Base):
     title: Mapped[str] = mapped_column(String(100), nullable=False)
     department_id: Mapped[int] = mapped_column(Integer, ForeignKey("departments.id"))
     level: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    headcount_plan: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     department: Mapped["Department"] = relationship(back_populates="positions")
@@ -33,6 +38,7 @@ class Employee(Base):
     __tablename__ = "employees"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    employee_no: Mapped[str | None] = mapped_column(String(50), unique=True, nullable=True, index=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     email: Mapped[str | None] = mapped_column(String(200), nullable=True)
     phone: Mapped[str | None] = mapped_column(String(50), nullable=True)
@@ -40,13 +46,20 @@ class Employee(Base):
     avatar: Mapped[str | None] = mapped_column(String(500), nullable=True)
     department_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("departments.id"), nullable=True)
     position_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("positions.id"), nullable=True)
+    manager_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("employees.id"), nullable=True)
+    work_location: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    employment_type: Mapped[str] = mapped_column(String(30), default="full_time")
+    contract_end_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    emergency_contact: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    emergency_phone: Mapped[str | None] = mapped_column(String(50), nullable=True)
     hire_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     status: Mapped[str] = mapped_column(String(20), default="active")
     role: Mapped[str] = mapped_column(String(20), default="employee")  # employee/manager/hr
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    department: Mapped["Department | None"] = relationship(back_populates="employees")
+    department: Mapped["Department | None"] = relationship(back_populates="employees", foreign_keys=[department_id])
     position: Mapped["Position | None"] = relationship(back_populates="employees")
+    manager: Mapped["Employee | None"] = relationship(remote_side=[id], foreign_keys=[manager_id])
     attendances: Mapped[list["Attendance"]] = relationship(back_populates="employee")
     salary_config: Mapped["SalaryConfig | None"] = relationship(back_populates="employee", uselist=False)
 

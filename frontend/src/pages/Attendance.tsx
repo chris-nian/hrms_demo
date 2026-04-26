@@ -1,24 +1,23 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { getAttendance, getAttendanceStats } from '@/api/index'
-import { EmptyState, LoadingState, PageHeader, Panel, StatCard } from '@/components/ui'
+import {
+  createAttendance,
+  getAttendance,
+  getAttendanceStats,
+  getEmployees,
+  updateAttendance,
+  type AttendanceRecord,
+  type AttendanceStats,
+  type Employee,
+} from '@/api/index'
+import { EmptyState, LoadingState, ModalShell, PageHeader, Panel, StatCard } from '@/components/ui'
 
-interface AttendanceRecord {
-  id: number
-  employee_name: string
-  date: string
-  check_in: string
-  check_out: string
-  status: string
-}
-
-interface AttendanceStats {
-  total_days: number
-  normal_days: number
-  late_days: number
-  absent_days: number
-  leave_days: number
-  rate: number
+const emptyForm = {
+  employee_id: '',
+  date: '',
+  check_in: '',
+  check_out: '',
+  status: 'normal',
 }
 
 const statusClasses: Record<string, string> = {
@@ -28,24 +27,56 @@ const statusClasses: Record<string, string> = {
   leave: 'bg-slate-100 text-slate-700',
 }
 
+function toLocalInput(value?: string | null) {
+  if (!value) return ''
+  const date = new Date(value)
+  const pad = (num: number) => String(num).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+
+function formatDateTime(value?: string | null) {
+  if (!value) return '-'
+  const date = new Date(value)
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
+function todayString() {
+  const now = new Date()
+  const pad = (num: number) => String(num).padStart(2, '0')
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
+}
+
 export default function Attendance() {
   const { t, i18n } = useTranslation()
   const isZh = i18n.language === 'zh'
   const [records, setRecords] = useState<AttendanceRecord[]>([])
+  const [employees, setEmployees] = useState<Employee[]>([])
   const [stats, setStats] = useState<AttendanceStats | null>(null)
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  const [employeeFilter, setEmployeeFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
   const [month, setMonth] = useState(() => {
     const now = new Date()
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
   })
   const [page, setPage] = useState(1)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [form, setForm] = useState(emptyForm)
   const pageSize = 10
 
   const loadData = useCallback(() => {
     setLoading(true)
     Promise.all([
-      getAttendance({ month, page, page_size: pageSize }),
+      getAttendance({
+        month,
+        page,
+        page_size: pageSize,
+        employee_id: employeeFilter || undefined,
+        status: statusFilter || undefined,
+      }),
       getAttendanceStats(month),
     ])
       .then(([attendanceData, statsData]) => {
@@ -54,56 +85,100 @@ export default function Attendance() {
         setStats(statsData)
       })
       .finally(() => setLoading(false))
-  }, [month, page])
+  }, [employeeFilter, month, page, statusFilter])
+
+  useEffect(() => {
+    getEmployees({ page_size: 100, status: 'active' }).then((data) => setEmployees(data.items || []))
+  }, [])
 
   useEffect(() => {
     loadData()
   }, [loadData])
 
-  const totalPages = Math.max(1, Math.ceil(total / pageSize))
-
-  if (loading && !records.length) {
-    return <LoadingState label={`${t('common.loading')}...`} />
+  const openAddModal = () => {
+    setEditingId(null)
+    setForm({ ...emptyForm, date: todayString(), employee_id: employeeFilter })
+    setModalOpen(true)
   }
 
+  const openEditModal = (record: AttendanceRecord) => {
+    setEditingId(record.id)
+    setForm({
+      employee_id: String(record.employee_id),
+      date: record.date,
+      check_in: toLocalInput(record.check_in),
+      check_out: toLocalInput(record.check_out),
+      status: record.status,
+    })
+    setModalOpen(true)
+  }
+
+  const submit = () => {
+    if (!form.employee_id || !form.date) return
+    setSubmitting(true)
+    const payload = {
+      employee_id: Number(form.employee_id),
+      date: form.date,
+      check_in: form.check_in ? new Date(form.check_in).toISOString() : null,
+      check_out: form.check_out ? new Date(form.check_out).toISOString() : null,
+      status: form.status,
+    }
+    const request = editingId ? updateAttendance(editingId, payload) : createAttendance(payload)
+    request
+      .then(() => {
+        setModalOpen(false)
+        loadData()
+      })
+      .catch(() => alert(t('common.error')))
+      .finally(() => setSubmitting(false))
+  }
+
+  const totalPages = Math.max(1, Math.ceil(total / pageSize))
+
+  if (loading && !records.length) return <LoadingState label={`${t('common.loading')}...`} />
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <PageHeader
-        eyebrow={isZh ? '月度追踪' : 'Monthly Tracking'}
+        eyebrow={isZh ? '月度台账' : 'Monthly Ledger'}
         title={t('attendance.title')}
         description={t('attendance.subtitle')}
-        meta={
-          <div className="flex items-center gap-3">
-            <div className="meta-chip">{t('common.total', { count: total })}</div>
-            <input className="field !min-h-[2.8rem] !w-auto px-4" type="month" value={month} onChange={(event) => { setMonth(event.target.value); setPage(1) }} />
-          </div>
-        }
+        actions={<button type="button" className="btn-primary" onClick={openAddModal}>{t('attendance.addRecord')}</button>}
+        meta={<div className="meta-chip">{t('common.total', { count: total })}</div>}
       />
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <StatCard label={t('attendance.stats')} value={stats?.total_days ?? 0} hint="Tracked workdays" tone="blue" />
-        <StatCard label={t('attendance.normal')} value={stats?.normal_days ?? 0} hint={`Late ${stats?.late_days ?? 0} / Leave ${stats?.leave_days ?? 0}`} tone="green" />
-        <StatCard label={t('attendance.rate')} value={`${stats?.rate?.toFixed(1) ?? '0.0'}%`} hint={`Absent ${stats?.absent_days ?? 0}`} tone="amber" />
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        <StatCard label={t('attendance.stats')} value={stats?.total_days ?? 0} hint={t('attendance.expectedDays')} tone="blue" />
+        <StatCard label={t('attendance.normal')} value={stats?.normal_days ?? 0} hint={t('attendance.normalHint')} tone="green" />
+        <StatCard label={t('attendance.late')} value={stats?.late_days ?? 0} hint={t('attendance.lateHint')} tone="amber" />
+        <StatCard label={t('attendance.absent')} value={stats?.absent_days ?? 0} hint={t('attendance.absentHint')} tone="rose" />
+        <StatCard label={t('attendance.rate')} value={`${stats?.rate?.toFixed(1) ?? '0.0'}%`} hint={t('attendance.rateHint')} tone="slate" />
       </section>
 
-      <Panel title={t('attendance.title')} description={isZh ? '表格行高、状态标签和列宽都重新整理过，每条记录终于像记录而不是挤压的表单。' : 'The table now uses balanced row height and clearer status chips so each day reads like a record, not a cramped spreadsheet.'}>
+      <Panel title={t('common.search')} description={t('attendance.filterDescription')}>
+        <div className="grid gap-4 md:grid-cols-4">
+          <input className="field" type="month" value={month} onChange={(event) => { setMonth(event.target.value); setPage(1) }} />
+          <select className="field-select" value={employeeFilter} onChange={(event) => { setEmployeeFilter(event.target.value); setPage(1) }}>
+            <option value="">{t('attendance.allEmployees')}</option>
+            {employees.map((employee) => <option key={employee.id} value={employee.id}>{employee.name}</option>)}
+          </select>
+          <select className="field-select" value={statusFilter} onChange={(event) => { setStatusFilter(event.target.value); setPage(1) }}>
+            <option value="">{t('common.all')}</option>
+            {['normal', 'late', 'absent', 'leave'].map((status) => <option key={status} value={status}>{t(`attendance.${status}`)}</option>)}
+          </select>
+          <button type="button" className="btn-secondary" onClick={() => { setEmployeeFilter(''); setStatusFilter(''); setPage(1) }}>{t('common.reset')}</button>
+        </div>
+      </Panel>
+
+      <Panel title={t('attendance.title')} description={t('attendance.tableDescription')}>
         {loading ? (
           <LoadingState label={`${t('common.loading')}...`} />
         ) : records.length === 0 ? (
-          <EmptyState
-            title={t('common.noData')}
-            description={isZh ? '当前月份下没有符合条件的考勤记录。' : 'No attendance records match the selected month.'}
-            icon={
-              <svg className="h-14 w-14 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3">
-                <circle cx="12" cy="12" r="8.5" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 2" />
-              </svg>
-            }
-          />
+          <EmptyState title={t('common.noData')} description={t('attendance.empty')} />
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="data-table min-w-[820px]">
+              <table className="data-table min-w-[900px]">
                 <thead>
                   <tr>
                     <th>{t('common.name')}</th>
@@ -111,6 +186,7 @@ export default function Attendance() {
                     <th>{t('attendance.checkIn')}</th>
                     <th>{t('attendance.checkOut')}</th>
                     <th>{t('common.status')}</th>
+                    <th>{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -118,36 +194,70 @@ export default function Attendance() {
                     <tr key={record.id}>
                       <td><strong>{record.employee_name}</strong></td>
                       <td>{record.date}</td>
-                      <td>{record.check_in || '-'}</td>
-                      <td>{record.check_out || '-'}</td>
-                      <td>
-                        <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusClasses[record.status] || statusClasses.normal}`}>
-                          {t(`attendance.${record.status}`)}
-                        </span>
-                      </td>
+                      <td>{formatDateTime(record.check_in)}</td>
+                      <td>{formatDateTime(record.check_out)}</td>
+                      <td><span className={`status-badge ${statusClasses[record.status] || statusClasses.normal}`}>{t(`attendance.${record.status}`)}</span></td>
+                      <td><button type="button" className="btn-secondary" onClick={() => openEditModal(record)}>{t('common.edit')}</button></td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-
             {totalPages > 1 && (
-              <div className="mt-5 flex flex-col gap-3 border-t border-[var(--border)] pt-5 md:flex-row md:items-center md:justify-between">
-                <div className="text-sm text-[var(--text-secondary)]">{t('common.total', { count: total })}</div>
+              <div className="mt-5 flex items-center justify-between border-t border-[var(--border)] pt-4">
+                <span className="text-sm text-[var(--text-secondary)]">{t('common.total', { count: total })}</span>
                 <div className="flex items-center gap-2">
-                  <button type="button" className="btn-secondary" disabled={page === 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>
-                    {isZh ? '上一页' : 'Prev'}
-                  </button>
-                  <div className="pill">{page} / {totalPages}</div>
-                  <button type="button" className="btn-secondary" disabled={page === totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))}>
-                    {isZh ? '下一页' : 'Next'}
-                  </button>
+                  <button type="button" className="btn-secondary" disabled={page === 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>{t('common.prev')}</button>
+                  <span className="pill">{page} / {totalPages}</span>
+                  <button type="button" className="btn-secondary" disabled={page === totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))}>{t('common.next')}</button>
                 </div>
               </div>
             )}
           </>
         )}
       </Panel>
+
+      {modalOpen && (
+        <ModalShell
+          title={editingId ? t('attendance.editRecord') : t('attendance.addRecord')}
+          subtitle={t('attendance.formDescription')}
+          onClose={() => setModalOpen(false)}
+          footer={
+            <>
+              <button type="button" className="btn-secondary" onClick={() => setModalOpen(false)}>{t('common.cancel')}</button>
+              <button type="button" className="btn-primary" disabled={submitting || !form.employee_id || !form.date} onClick={submit}>{submitting ? '...' : t('common.save')}</button>
+            </>
+          }
+        >
+          <div className="grid gap-5 md:grid-cols-2">
+            <div>
+              <label className="field-label">{t('common.name')}</label>
+              <select className="field-select" value={form.employee_id} onChange={(event) => setForm({ ...form, employee_id: event.target.value })}>
+                <option value="">{t('common.select')}</option>
+                {employees.map((employee) => <option key={employee.id} value={employee.id}>{employee.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="field-label">{t('attendance.date')}</label>
+              <input className="field" type="date" value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} />
+            </div>
+            <div>
+              <label className="field-label">{t('attendance.checkIn')}</label>
+              <input className="field" type="datetime-local" value={form.check_in} onChange={(event) => setForm({ ...form, check_in: event.target.value })} />
+            </div>
+            <div>
+              <label className="field-label">{t('attendance.checkOut')}</label>
+              <input className="field" type="datetime-local" value={form.check_out} onChange={(event) => setForm({ ...form, check_out: event.target.value })} />
+            </div>
+            <div className="md:col-span-2">
+              <label className="field-label">{t('common.status')}</label>
+              <select className="field-select" value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value })}>
+                {['normal', 'late', 'absent', 'leave'].map((status) => <option key={status} value={status}>{t(`attendance.${status}`)}</option>)}
+              </select>
+            </div>
+          </div>
+        </ModalShell>
+      )}
     </div>
   )
 }
