@@ -209,3 +209,31 @@ class DashboardStats(BaseModel):
     salary_config_coverage: float
     department_distribution: list[dict]
     recent_approvals: list[ApprovalFlowOut]
+
+
+# ─── Candidate ───
+class CandidateBase(BaseModel):
+    name: str
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    position_id: Optional[int] = None
+    owner_id: Optional[int] = None
+    stage: str = "new"
+    source: Optional[str] = None
+    notes: Optional[str] = None
+
+class CandidateCreate(CandidateBase):
+    pass
+
+class CandidateUpdate(CandidateBase):
+    pass
+
+class CandidateOut(CandidateBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    position_title: str = ""
+    owner_name: str = ""
+
+    class Config:
+        from_attributes = True

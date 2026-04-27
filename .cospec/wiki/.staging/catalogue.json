@@ -1,114 +1,324 @@
 [
   {
-    "title": "1、Project Overview & Quick Start",
-    "prompt": "Help users quickly understand the HRMS (人力资源管理系统) project — a full-stack human resource management web application. Cover the core value proposition, technology stack composition, target user groups (employees, managers, HR staff), and provide a practical quick-start guide so new users can get the system running within minutes.",
+    "title": "01 Product Goals and Background",
+    "prompt": "Analyze the repository to document product goals and background for HRMS-Eng, a full-stack Human Resource Management System. Explain what HR problem this project solves, who the target users are (employees, managers, HR staff), what core capabilities deliver value, and what is in and out of scope. Reference specific files such as backend/main.py, frontend/src/App.tsx, backend/models.py, backend/seed.py, and frontend/src/pages/Dashboard.tsx to support conclusions. Include a Mermaid diagram showing the product context and how the seven business modules (Dashboard, Employees, Departments, Positions, Attendance, Salary, Approvals) relate to each other.",
     "sections": [
       {
-        "title": "project-overview",
-        "name": "Project Overview",
-        "prompt": "Provide a comprehensive introduction to the HRMS project. Explain that it is a full-stack HR management system with a Python FastAPI backend and React 18 + TypeScript frontend. Describe the core value: managing departments, positions, employees, attendance, salary (with China mainland tax rules), and approval workflows (with state machine engine). List the complete technology stack — Backend: FastAPI, SQLAlchemy ORM, SQLite, Pydantic, Uvicorn; Frontend: React 18, TypeScript, Vite, Tailwind CSS v4, React Router v7, Zustand, react-i18next, Axios, Recharts; DevOps: Docker multi-stage build, custom bash management script. Identify target users: employees (view info, submit approvals), managers (approve team requests), HR staff (manage all modules). Reference backend/main.py as the app entry point, frontend/src/main.tsx as the frontend entry, and the hrms bash script as the management CLI.",
+        "title": "product-positioning-and-value",
+        "name": "Product Positioning and Value",
+        "prompt": "Explain the product positioning of HRMS-Eng as an HR management platform. Describe the target problem (managing employee lifecycle, attendance, compensation, and organizational hierarchy), the value proposition for each user group (employee, manager, HR), and the core outcomes expected. Reference the demo data seeded in backend/seed.py (8 departments, 30+ positions, 80+ employees) as evidence of intended scope. Contrast what the product does versus generic HR tools.",
         "sections": []
       },
       {
-        "title": "environment-setup",
-        "name": "Environment Setup & Development Workflow",
-        "prompt": "Guide users through setting up the development environment and understanding the development workflow. Cover: (1) Prerequisites: Python 3.12+, Node.js 20+, npm; (2) Using the ./hrms management script — explain each command: start (builds frontend + starts backend on port 8000), stop, restart, status, build (frontend only), rebuild (full install + build), logs; (3) How the startup flow works: backend/main.py calls Base.metadata.create_all() then seed() on first run to create tables and seed demo data; (4) Development proxy: Vite dev server on port 5173 proxies /api requests to localhost:8000 (see vite.config.ts); (5) Production mode: backend serves frontend/dist/ as static files via FastAPI StaticFiles and a catch-all SPA route. Reference the hrms bash script, backend/main.py lines 13-36, and frontend/vite.config.ts.",
+        "title": "core-capabilities-overview",
+        "name": "Core Capabilities Overview",
+        "prompt": "Document each of the seven business capabilities: Dashboard analytics, Employee management, Department and Position hierarchy management, Attendance tracking, Salary calculation with China mainland tax rules, and multi-level Approval workflows. For each capability, describe the problem it solves, the user value, the observable behavior, and the supporting repository files (routers, pages, services). Reference backend/routers/*.py and frontend/src/pages/*.tsx as evidence.",
         "sections": []
       },
       {
-        "title": "quick-reference",
-        "name": "Quick Reference",
-        "prompt": "Provide a quick-reference card for the HRMS project. Include: (1) Port configuration: dev frontend on 5173, API on 8000, production both on 8000; (2) Key CLI commands from the hrms script: ./hrms start|stop|restart|status|build|logs|rebuild; (3) API base URL pattern: all endpoints use /api/* prefix (e.g., /api/employees, /api/departments, /api/attendance, /api/salary, /api/approvals, /api/dashboard); (4) List endpoints response format: { total: number, items: [] }; (5) Database location: data/hrms.db (configurable via HRMS_DATA_DIR env var); (6) Frontend path alias: @/ maps to src/; (7) i18n key: localStorage 'hrms-lang' (zh/en); (8) Role key: localStorage 'hrms-role' (employee/manager/hr). Reference backend/database.py, frontend/vite.config.ts, frontend/src/stores/appStore.ts, and frontend/src/api/index.ts.",
+        "title": "scope-and-non-goals",
+        "name": "Scope and Non-Goals",
+        "prompt": "Define the explicit scope boundaries of this HRMS project based on observable code. What is implemented (employee CRUD with soft-delete, attendance recording, salary calculation, approval workflows, bilingual UI, Docker deployment)? What is explicitly not implemented (real authentication/SSO, payroll batch processing, advanced reporting/BI, mobile app, email notifications)? Use backend/models.py, frontend/src/App.tsx routing structure, and Dockerfile to justify scope conclusions.",
+        "sections": []
+      },
+      {
+        "title": "project-constraints-and-assumptions",
+        "name": "Project Constraints and Assumptions",
+        "prompt": "Identify the key constraints and assumptions baked into the codebase: SQLite as the production database (not Postgres/MySQL), single-container deployment via Docker, client-side role switching without real authentication (Zustand store + localStorage), China mainland tax rules hardcoded in backend/services/salary_calculator.py, English/Chinese bilingual support with Chinese as default language (frontend/src/i18n.ts). Explain the implications of each constraint on scalability, security, and maintainability.",
+        "sections": []
+      },
+      {
+        "title": "product-context-diagram",
+        "name": "Product Context Diagram",
+        "prompt": "Create a Mermaid diagram showing HRMS-Eng in its product context: actors (Employee, Manager, HR Staff), the system boundary, external dependencies (SQLite database, browser/SPA, Docker runtime), and how data flows between modules. Reference the routing in frontend/src/App.tsx and API structure in backend/main.py to ensure accuracy.",
         "sections": []
       }
     ]
   },
   {
-    "title": "2、System Architecture & Technical Design",
-    "prompt": "Provide a comprehensive technical analysis of the HRMS system architecture, covering both backend and frontend design patterns, data model relationships, and how the full-stack system integrates. Help technical experts understand the architectural decisions, component interactions, and data flow throughout the system.",
+    "title": "02 Users and Business Scenarios",
+    "prompt": "Analyze the repository to document users and business scenarios for HRMS-Eng. Identify the three user roles (employee, manager, hr) from backend/models.py (Employee.role field), frontend/src/stores/appStore.ts (validRoles array), and backend/routers/approvals.py (role checks). Describe end-to-end workflows for key scenarios: an employee applying for leave through approval, an HR admin onboarding a new employee, a manager reviewing team attendance, and an HR staff calculating monthly salary. Include Mermaid diagrams for scenario flows and user journeys.",
     "sections": [
       {
-        "title": "backend-architecture",
-        "name": "Backend Architecture",
-        "prompt": "Analyze the backend architecture of the HRMS system built with FastAPI. Cover: (1) Entry point: backend/main.py creates the FastAPI app, registers 7 routers (departments, positions, employees, attendance, salary, approvals, dashboard), initializes the database, seeds demo data, and serves the SPA static files; (2) Layered pattern: Router layer (backend/routers/) handles HTTP endpoints and request validation, Service layer (backend/services/) contains business logic (approval_engine.py for state machine, salary_calculator.py for tax computation), Model layer (backend/models.py) defines 7 SQLAlchemy ORM models with relationships, Schema layer (backend/schemas.py) defines Pydantic schemas following the *Base/*Create/*Update/*Out pattern; (3) Database setup: backend/database.py configures SQLite with SQLAlchemy, uses DeclarativeBase, provides get_db() dependency injection; (4) API design: all routers use /api/* prefix, list endpoints support pagination (page/page_size) and filtering, response format is {total, items}; (5) How routers follow a consistent CRUD pattern with _to_out() helper methods for data transformation. Reference backend/main.py, backend/database.py, backend/models.py, backend/schemas.py, and all router files.",
+        "title": "user-roles-and-personas",
+        "name": "User Roles and Personas",
+        "prompt": "Document the three user roles defined in the system: employee, manager, and hr. For each role, describe their goals, typical permissions (inferred from approval router checks and UI page access), and the data they can view or modify. Reference backend/models.py (role field with default 'employee'), frontend/src/stores/appStore.ts (role switching via localStorage), and backend/routers/approvals.py (role-based approval logic) as supporting evidence.",
         "sections": []
       },
       {
-        "title": "frontend-architecture",
-        "name": "Frontend Architecture",
-        "prompt": "Analyze the frontend architecture of the HRMS system built with React 18 + TypeScript. Cover: (1) Entry point: frontend/src/main.tsx bootstraps the React app; (2) Routing: frontend/src/App.tsx uses React Router v7 with a Layout wrapper and 6 child routes (Dashboard, Employees, Departments, Attendance, Salary, Approvals); (3) Layout shell: frontend/src/components/Layout.tsx implements the sidebar navigation with 6 nav items, role switcher (employee/manager/hr), language switcher (zh/en), and collapsible sidebar; (4) State management: frontend/src/stores/appStore.ts uses Zustand to manage currentRole and sidebarCollapsed with localStorage persistence; (5) API client: frontend/src/api/index.ts creates an Axios instance with baseURL '/api' and exports typed functions for all endpoints (CRUD for departments/positions/employees, query for attendance/salary, workflow for approvals, stats for dashboard); (6) Styling: Tailwind CSS v4 with CSS variables defined in frontend/src/index.css, custom classes like surface-panel, metric-card, page-enter animations; (7) i18n: frontend/src/i18n.ts configures react-i18next with zh/en locales from frontend/src/locales/; (8) UI components: frontend/src/components/ui.tsx provides reusable components. Reference all frontend source files.",
+        "title": "employee-self-service-scenarios",
+        "name": "Employee Self-Service Scenarios",
+        "prompt": "Describe the self-service workflows available to a typical employee user: viewing personal information and salary details, checking attendance records, submitting approval requests (leave, salary adjustment, other), and tracking approval status. Map each workflow to specific frontend pages (frontend/src/pages/Employees.tsx, frontend/src/pages/Attendance.tsx, frontend/src/pages/Approvals.tsx, frontend/src/pages/Salary.tsx) and corresponding API endpoints in frontend/src/api/index.ts.",
         "sections": []
       },
       {
-        "title": "data-model",
-        "name": "Data Model & Relationships",
-        "prompt": "Provide a detailed analysis of the HRMS data model defined in backend/models.py. Cover all 7 ORM models and their relationships: (1) Department — has many Employees (back_populates), has many Positions (back_populates); (2) Position — belongs to Department (ForeignKey), has many Employees (back_populates), includes title and level fields; (3) Employee — belongs to Department and Position (ForeignKeys), has many Attendances (back_populates), has one SalaryConfig (uselist=False), includes role field (employee/manager/hr) and status field; (4) Attendance — belongs to Employee (ForeignKey), tracks check_in/check_out datetime and status (normal/late/absent/leave); (5) SalaryConfig — belongs to Employee (unique ForeignKey), stores base_salary, housing_fund_rate (default 0.12), social_insurance_rate (default 0.105), bonus, deduction; (6) ApprovalFlow — belongs to applicant Employee and current_approver Employee (ForeignKeys), has many ApprovalRecords (cascade delete-orphan), includes state field (draft/pending_manager/pending_hr/approved/rejected), type field (leave/salary_adjust/other), and JSON content field; (7) ApprovalRecord — belongs to ApprovalFlow (ForeignKey) and approver Employee (ForeignKey), records action (approve/reject/submit) and comment. Explain the SQLAlchemy Mapped type annotations and relationship patterns used. Reference backend/models.py.",
+        "title": "manager-approval-and-team-management",
+        "name": "Manager Approval and Team Management",
+        "prompt": "Document the manager-specific scenarios: reviewing and approving/rejecting subordinate requests in the approval workflow (draft → pending_manager → pending_hr → approved/rejected), viewing team attendance and department metrics on the Dashboard. Reference backend/services/approval_engine.py (VALID_TRANSITIONS state machine), backend/routers/approvals.py (manager approval actions), and frontend/src/pages/Dashboard.tsx (manager view context). Explain the business rules for when a manager can approve versus escalate to HR.",
+        "sections": []
+      },
+      {
+        "title": "hr-administration-workflows",
+        "name": "HR Administration Workflows",
+        "prompt": "Describe the HR administrator workflows: onboarding new employees (including setting department, position, manager, salary config), managing department and position hierarchies (backend/routers/departments.py, backend/routers/positions.py), processing final approval decisions, handling employee status changes (soft-delete via DELETE /api/employees/{id} setting status='inactive'), and reviewing company-wide metrics on the Dashboard. Reference backend/seed.py for understanding the demo data model that HR would manage.",
+        "sections": []
+      },
+      {
+        "title": "salary-calculation-scenario",
+        "name": "Salary Calculation Scenario",
+        "prompt": "Document the end-to-end salary calculation scenario from an HR perspective: configuring an employee's salary parameters (base_salary, housing_fund_rate default 0.12, social_insurance_rate default 0.105, bonus, deduction) via backend/routers/salary.py, running the calculation through backend/services/salary_calculator.py which applies China mainland progressive tax brackets (TAX_THRESHOLD=5000, 7 brackets from 3% to 45%), and interpreting the resulting gross salary, deductions, taxable income, income tax, and net salary. Include the specific tax bracket table from the code.",
+        "sections": []
+      },
+      {
+        "title": "scenario-flow-diagrams",
+        "name": "Scenario Flow Diagrams",
+        "prompt": "Create Mermaid sequence diagrams or flowcharts for the following critical scenarios: (1) Employee submits a leave request and it flows through manager and HR approval, (2) HR onboards a new employee from creation to salary configuration, (3) Monthly attendance review process from data entry to dashboard reporting. Reference the exact state transitions in backend/services/approval_engine.py and the API flows in frontend/src/api/index.ts.",
         "sections": []
       }
     ]
   },
   {
-    "title": "3、Business Modules & Implementation",
-    "prompt": "Provide an in-depth analysis of each business module in the HRMS system, covering both the backend API implementation and the frontend page implementation. Help readers understand how each module's data flows from the database through the API to the UI, and how the modules interconnect.",
+    "title": "03 Requirements and Business Rules",
+    "prompt": "Analyze the repository to document requirements and business rules for HRMS-Eng. Extract functional requirements from the seven backend routers (backend/routers/*.py), Pydantic schemas (backend/schemas.py with field validators), the approval state machine (backend/services/approval_engine.py), and salary calculation logic (backend/services/salary_calculator.py). Document non-functional requirements inferred from Dockerfile, docker-compose.yml, database.py, and test configurations. Identify validation rules, edge cases, and business rules encoded in tests.",
     "sections": [
       {
-        "title": "org-management",
-        "name": "Organization Management (Departments & Positions)",
-        "prompt": "Analyze the organization management modules that handle departments and positions. Cover: (1) Department module — backend/routers/departments.py provides CRUD endpoints at /api/departments, the DepartmentOut schema includes computed employee_count, the Department model has relationships to employees and positions; (2) Position module — backend/routers/positions.py provides CRUD endpoints at /api/positions with optional department_id filtering, the PositionOut schema includes computed department_name; (3) Frontend implementation — frontend/src/pages/Departments.tsx manages both departments and positions in a unified UI, showing department list with employee counts and position list filtered by selected department; (4) Data relationships — positions belong to departments, employees belong to both departments and positions, creating a three-level organizational hierarchy. Reference backend/routers/departments.py, backend/routers/positions.py, backend/models.py (Department, Position classes), backend/schemas.py (DepartmentBase/Create/Update/Out, PositionBase/Create/Update/Out), and frontend/src/pages/Departments.tsx.",
+        "title": "functional-requirements-by-module",
+        "name": "Functional Requirements by Module",
+        "prompt": "For each of the seven business modules (Dashboard, Employees, Departments, Positions, Attendance, Salary, Approvals), document the functional requirements by analyzing the corresponding router files in backend/routers/*.py and frontend pages in frontend/src/pages/*.tsx. For each requirement, describe: the problem it solves, the exact behavior implemented, the API contract (method, path, request/response), validation rules from backend/schemas.py, and any edge cases handled. Pay special attention to the soft-delete behavior in backend/routers/employees.py (DELETE sets status='inactive') and the approval state transitions in backend/routers/approvals.py.",
         "sections": []
       },
       {
-        "title": "employee-management",
-        "name": "Employee Management",
-        "prompt": "Analyze the employee management module. Cover: (1) Backend: backend/routers/employees.py provides CRUD endpoints at /api/employees with list filtering (search by name, filter by department_id and status) and pagination (page/page_size), the _to_out() helper enriches EmployeeOut with department_name and position_title by querying related Department and Position; (2) Schema: EmployeeOut extends EmployeeBase with id, created_at, department_name, position_title — includes role field (employee/manager/hr) for access control and status field (active/inactive); (3) Frontend: frontend/src/pages/Employees.tsx provides a searchable, filterable employee list with department and status filters, supports creating and editing employees with form fields for all Employee attributes; (4) Employee as the central entity — connected to Department, Position, Attendance, SalaryConfig, and ApprovalFlow models. Reference backend/routers/employees.py, backend/models.py (Employee class), backend/schemas.py (Employee schemas), frontend/src/pages/Employees.tsx, and frontend/src/api/index.ts (employee API functions).",
+        "title": "business-rules-and-validations",
+        "name": "Business Rules and Validations",
+        "prompt": "Extract and document all business rules and validation logic found in the codebase: (1) Email format validation in schemas.py (@field_validator), (2) Approval state machine transitions (draft → pending_manager → pending_hr → approved/rejected) in backend/services/approval_engine.py, (3) Salary calculation rules with China mainland progressive tax brackets in backend/services/salary_calculator.py, (4) Employee soft-delete rule (status='inactive' instead of hard delete), (5) Role values restricted to employee/manager/hr. For each rule, cite the exact file and line, explain the business rationale, and describe what happens when the rule is violated.",
         "sections": []
       },
       {
-        "title": "attendance-management",
-        "name": "Attendance Management",
-        "prompt": "Analyze the attendance management module. Cover: (1) Backend: backend/routers/attendance.py provides list and stats endpoints at /api/attendance, supports filtering by employee_id and month, /api/attendance/stats returns aggregated statistics; (2) Data model: Attendance records track employee_id, date, check_in/check_out times, and status (normal/late/absent/leave); (3) Seeding: backend/seed.py generates attendance data for the current month, skipping weekends, with weighted random status distribution (80% normal, 10% late, 5% absent, 5% leave); (4) Frontend: frontend/src/pages/Attendance.tsx displays attendance records with filtering and statistics visualization using Recharts; (5) API functions: getAttendance() and getAttendanceStats() in frontend/src/api/index.ts. Reference backend/routers/attendance.py, backend/models.py (Attendance class), backend/schemas.py (AttendanceBase/Create/Out), backend/seed.py (attendance seeding logic), and frontend/src/pages/Attendance.tsx.",
+        "title": "non-functional-requirements",
+        "name": "Non-Functional Requirements",
+        "prompt": "Infer and document non-functional requirements from the codebase: deployment requirements (Docker multi-stage build in Dockerfile, docker-compose.yml with port 8000 and volume mount), data persistence requirements (SQLite via SQLAlchemy, auto-seeding on startup in backend/main.py and backend/seed.py), schema evolution handling (upgrade_sqlite_schema() in backend/database.py for adding columns to existing tables), i18n requirements (Chinese default, English secondary in frontend/src/i18n.ts and frontend/src/locales/), performance expectations (client-side SPA with Vite build), and testing requirements (pytest for backend, Vitest for frontend in run-tests.sh).",
         "sections": []
       },
       {
-        "title": "salary-management",
-        "name": "Salary Management",
-        "prompt": "Analyze the salary management module with its China mainland tax calculation system. Cover: (1) Backend: backend/routers/salary.py provides endpoints at /api/salary — GET /config/{employeeId} to retrieve SalaryConfig, PUT /config/{employeeId} to update it, POST /calculate to compute salary breakdown; (2) SalaryConfig model: stores base_salary, housing_fund_rate (default 0.12/12%), social_insurance_rate (default 0.105/10.5%), bonus, deduction per employee; (3) Salary calculation flow: gross = base + bonus - deduction; social_insurance = gross * 0.105; housing_fund = gross * 0.12; taxable_income = gross - social_insurance - housing_fund - 5000 (tax threshold); income_tax from progressive brackets; net_salary = gross - social_insurance - housing_fund - income_tax; (4) Schema: SalaryCalculateRequest, SalaryCalculateResult with details array for itemized breakdown; (5) Frontend: frontend/src/pages/Salary.tsx provides salary config editing and calculation preview. Reference backend/routers/salary.py, backend/services/salary_calculator.py, backend/models.py (SalaryConfig), backend/schemas.py (SalaryConfig schemas), and frontend/src/pages/Salary.tsx.",
+        "title": "edge-cases-and-error-handling",
+        "name": "Edge Cases and Error Handling",
+        "prompt": "Document edge cases and error handling patterns observed in the code: what happens when an approval action is invalid per the state machine (backend/services/approval_engine.py), how the salary calculator handles taxable_income <= 0 (returns 0.0 tax), what happens when database schema evolves (upgrade_sqlite_schema in backend/database.py), how the frontend handles API errors (axios interceptors or error patterns in frontend/src/api/index.ts), and how the system handles missing demo data directories (HRMS_DATA_DIR fallback in backend/database.py).",
         "sections": []
       },
       {
-        "title": "approval-workflow",
-        "name": "Approval Workflow",
-        "prompt": "Analyze the approval workflow module with its finite state machine engine. Cover: (1) Backend: backend/routers/approvals.py provides endpoints at /api/approvals — GET list with role/status/applicant filtering, GET detail, POST create (auto-submits to pending_manager), POST /{id}/approve, POST /{id}/reject; (2) State machine: draft → pending_manager (submit) → pending_hr (approve by manager) → approved (approve by HR), with reject possible at both manager and HR levels resulting in rejected state; (3) ApprovalFlow model: tracks title, type (leave/salary_adjust/other), applicant_id, state, current_approver_id, and JSON content; (4) ApprovalRecord model: logs each action (submit/approve/reject) with approver_id, comment, and timestamp; (5) Flow: on creation, system finds a manager as first approver, auto-submits creating a submit record; on approve, transitions state and finds next approver (HR for pending_hr); on reject, transitions to rejected; (6) Frontend: frontend/src/pages/Approvals.tsx shows approval list filtered by role context, detail view with approval timeline and action buttons. Reference backend/routers/approvals.py, backend/services/approval_engine.py, backend/models.py (ApprovalFlow, ApprovalRecord), backend/schemas.py (Approval schemas), and frontend/src/pages/Approvals.tsx.",
-        "sections": []
-      },
-      {
-        "title": "dashboard",
-        "name": "Dashboard Analytics",
-        "prompt": "Analyze the dashboard analytics module. Cover: (1) Backend: backend/routers/dashboard.py provides GET /api/dashboard/stats that aggregates key metrics across all modules — total employees, department count, attendance statistics, salary summaries; (2) Dashboard data aggregation pattern: queries multiple models (Employee, Department, Attendance, SalaryConfig) to compute summary statistics; (3) Frontend: frontend/src/pages/Dashboard.tsx renders the main dashboard with metric cards and charts using Recharts, provides the home page experience; (4) Role-aware display: dashboard content adapts based on the current role (employee/manager/hr) stored in localStorage; (5) This module serves as the system's landing page (Route index in App.tsx). Reference backend/routers/dashboard.py, backend/schemas.py (dashboard schemas), frontend/src/pages/Dashboard.tsx, frontend/src/App.tsx, and frontend/src/api/index.ts (getDashboardStats).",
+        "title": "requirements-traceability",
+        "name": "Requirements Traceability",
+        "prompt": "Map major requirements to their implementation and verification locations. Create a traceability matrix linking each functional requirement to: (1) the backend router file implementing it, (2) the frontend page consuming it, (3) the database model supporting it, and (4) the test file verifying it. For example, employee creation maps to backend/routers/employees.py, frontend/src/pages/Employees.tsx, backend/models.py (Employee class), and backend/tests/test_employees.py. Include all seven modules.",
         "sections": []
       }
     ]
   },
   {
-    "title": "4、Core Services & Deployment",
-    "prompt": "Provide deep technical analysis of the two core service engines and the deployment infrastructure. These are the most technically sophisticated parts of the HRMS system, implementing domain-specific business logic and production-ready deployment patterns.",
+    "title": "04 Permissions and Data Models",
+    "prompt": "Analyze the repository to document permissions and data models for HRMS-Eng. Examine backend/models.py for all SQLAlchemy domain entities and relationships, backend/database.py for persistence configuration, backend/schemas.py for Pydantic DTOs, and frontend/src/stores/appStore.ts for client-side role management. Document the permission model (role-based access with employee/manager/hr roles), data ownership rules, and the complete entity-relationship structure. Include Mermaid ER diagrams and data flow diagrams.",
     "sections": [
       {
-        "title": "approval-state-machine",
-        "name": "Approval State Machine Engine",
-        "prompt": "Provide a deep technical analysis of the approval state machine engine implemented in backend/services/approval_engine.py. Cover: (1) Design pattern: implements the State Machine pattern with VALID_TRANSITIONS dict mapping each state to its allowed actions and resulting states — draft: {submit: pending_manager}, pending_manager: {approve: pending_hr, reject: rejected}, pending_hr: {approve: approved, reject: rejected}, approved/rejected: {} (terminal states); (2) API functions: can_transition(current_state, action) validates if an action is allowed from the current state, next_state(current_state, action) returns the resulting state; (3) Integration with router: backend/routers/approvals.py uses these functions to guard state transitions — approve endpoint checks can_transition before applying next_state, raises HTTP 400 if invalid; (4) Business flow: creation auto-submits (draft → pending_manager), manager approval advances to HR review (pending_manager → pending_hr), HR approval finalizes (pending_hr → approved), rejection at any review stage terminates (→ rejected); (5) Record keeping: each transition creates an ApprovalRecord with action, approver_id, comment, and timestamp for full audit trail. Reference backend/services/approval_engine.py and backend/routers/approvals.py.",
+        "title": "permission-model-and-role-system",
+        "name": "Permission Model and Role System",
+        "prompt": "Document the permission model used in HRMS-Eng. The system uses a simplified role-based model with three roles (employee, manager, hr) stored on the Employee model (backend/models.py, role field default='employee'). On the frontend, role switching is handled via Zustand store (frontend/src/stores/appStore.ts) with localStorage persistence — this is purely a UI convenience, not real authentication. On the backend, the approval router (backend/routers/approvals.py) enforces real role checks for approval actions. Document what each role can and cannot do, where role checks happen in the backend, and the security implications of client-side role management.",
         "sections": []
       },
       {
-        "title": "salary-calculation-engine",
-        "name": "Salary Calculation Engine",
-        "prompt": "Provide a deep technical analysis of the salary calculation engine implemented in backend/services/salary_calculator.py. Cover: (1) China mainland individual income tax system: TAX_BRACKETS array defines 7 progressive tiers — (3000, 3%, 0), (12000, 10%, 210), (25000, 20%, 1410), (35000, 25%, 2660), (55000, 30%, 4410), (80000, 35%, 7160), (inf, 45%, 15160) — where each tuple is (upper_bound, rate, quick_deduction); (2) TAX_THRESHOLD = 5000 (个税起征点); (3) calculate_tax(taxable_income): iterates brackets to find matching tier, returns round(taxable_income * rate - quick_deduction, 2); (4) calculate_salary() function: computes gross = base + bonus - deduction, social_insurance = gross * social_insurance_rate (default 10.5%), housing_fund = gross * housing_fund_rate (default 12%), taxable_income = gross - social_insurance - housing_fund - 5000, income_tax from progressive brackets, net_salary = gross - social_insurance - housing_fund - income_tax; (5) Returns a structured dict with all intermediate values plus a details array of labeled items for UI display. Reference backend/services/salary_calculator.py, backend/routers/salary.py, and backend/schemas.py (SalaryCalculateRequest, SalaryCalculateResult).",
+        "title": "domain-entities-and-attributes",
+        "name": "Domain Entities and Attributes",
+        "prompt": "Document all domain entities defined in backend/models.py: Department (with manager_id, headcount_plan, description), Position (with department_id, level, headcount_plan), Employee (with employee_no, department_id, position_id, manager_id, work_location, employment_type, contract_end_date, emergency contact info, hire_date, status, role), Attendance (employee_id, date, check_in, check_out, status), SalaryConfig (employee_id, base_salary, housing_fund_rate, social_insurance_rate, bonus, deduction), ApprovalFlow (title, type, applicant_id, content JSON, state, current_approver_id), and ApprovalRecord (flow_id, approver_id, action, comment). For each entity, list key attributes, constraints, defaults, and relationships.",
         "sections": []
       },
       {
-        "title": "deployment-and-devops",
-        "name": "Deployment & DevOps",
-        "prompt": "Analyze the deployment infrastructure and DevOps setup for the HRMS system. Cover: (1) Dockerfile: multi-stage build — Stage 1 uses node:20-alpine to install and build the frontend (npm install + npm run build), Stage 2 uses python:3.12-slim to install backend dependencies (pip install), copies backend code and frontend dist from Stage 1, exposes port 8000, runs uvicorn main:app; (2) docker-compose.yml: orchestrates the container deployment with port mapping; (3) Custom management script (hrms): bash script providing start/stop/restart/status/build/logs/rebuild commands — handles PID-based process management, port conflict detection (lsof), auto-builds frontend if dist/ missing, auto-installs backend deps if fastapi not found, creates data directory, runs uvicorn with nohup; (4) Database configuration: SQLite stored in data/hrms.db, path configurable via HRMS_DATA_DIR environment variable, auto-created on startup; (5) Data seeding: backend/seed.py populates demo data on first run (5 departments, 18 positions, 16 employees, attendance records, salary configs, sample approval flows) — checks if Department count > 0 to avoid re-seeding; (6) Production serving: backend/main.py mounts frontend/dist/assets as static files and provides a catch-all SPA route returning index.html for client-side routing. Reference Dockerfile, docker-compose.yml, hrms script, backend/database.py, backend/seed.py, and backend/main.py.",
+        "title": "entity-relationship-diagram",
+        "name": "Entity Relationship Diagram",
+        "prompt": "Create a Mermaid ER diagram showing all entities from backend/models.py and their relationships: Department has many Employees and Positions; Position belongs to Department and has many Employees; Employee belongs to Department and Position, has one Manager (self-referential), has many Attendance records, has one SalaryConfig, and is referenced by ApprovalFlow (as applicant and current_approver) and ApprovalRecord (as approver). Include cardinality, foreign keys, and any cascade behaviors (e.g., ApprovalRecord cascade='all, delete-orphan' on ApprovalFlow).",
+        "sections": []
+      },
+      {
+        "title": "persistence-and-data-lifecycle",
+        "name": "Persistence and Data Lifecycle",
+        "prompt": "Document the persistence layer: SQLite database configured in backend/database.py with SQLAlchemy ORM (DeclarativeBase), engine with check_same_thread=False for multi-threading, session management via get_db() dependency. Describe the data lifecycle: tables are auto-created on startup (Base.metadata.create_all in backend/main.py), schema is evolved via upgrade_sqlite_schema() for adding new columns to existing tables, and demo data is seeded automatically via backend/seed.py (80+ employees, 8 departments, 30+ positions). Document the HRMS_DATA_DIR environment variable for configuring the database location and the implications of auto-seeding in production.",
+        "sections": []
+      },
+      {
+        "title": "schemas-and-dto-contracts",
+        "name": "Schemas and DTO Contracts",
+        "prompt": "Document the Pydantic v2 schema layer in backend/schemas.py. For each entity, describe the Base, Create, Update, and Out schema variants. Highlight important validators such as the email format validator on EmployeeBase (@field_validator checking for '@' and '.' presence). Explain how from_attributes = True in Config classes enables ORM mode conversion. Document how schemas enforce data shapes at API boundaries and how they relate to the frontend TypeScript interfaces in frontend/src/api/index.ts.",
+        "sections": []
+      },
+      {
+        "title": "data-ownership-and-privacy",
+        "name": "Data Ownership and Privacy",
+        "prompt": "Document data ownership and privacy considerations: employees own their personal data (contact info, emergency contacts, salary config), managers own team-related data (department headcount, team attendance), HR owns company-wide data (all employee records, approval flows, salary calculations). Describe the soft-delete pattern for employees (status='inactive' instead of hard deletion) and its implications for data retention. Note any privacy gaps such as the absence of field-level encryption or audit logging for sensitive data access.",
+        "sections": []
+      }
+    ]
+  },
+  {
+    "title": "05 Interaction and Technical Solution",
+    "prompt": "Analyze the repository to document interactions and technical solutions for HRMS-Eng. Examine the frontend-backend API contract in frontend/src/api/index.ts, the backend router implementations in backend/routers/*.py, the frontend routing in frontend/src/App.tsx, the state management in frontend/src/stores/appStore.ts, and the custom CSS design system in frontend/src/index.css. Document user interactions, API flows, interface contracts, error handling, and the rationale behind key technical decisions. Include Mermaid sequence diagrams for major interactions.",
+    "sections": [
+      {
+        "title": "frontend-architecture-and-routing",
+        "name": "Frontend Architecture and Routing",
+        "prompt": "Document the frontend architecture: React 18 SPA with Vite 6 build tool, React Router v7 for client-side routing (routes defined in frontend/src/App.tsx: /, /employees, /departments, /attendance, /salary, /approvals), Zustand for state management (frontend/src/stores/appStore.ts handling role and sidebar state), react-i18next for bilingual support (Chinese default in frontend/src/i18n.ts), and Recharts for dashboard analytics. Describe the component structure (Layout.tsx as shell, ui.tsx for reusable components, pages/*.tsx for route-level views) and how data flows from API layer to UI.",
+        "sections": []
+      },
+      {
+        "title": "api-contract-and-endpoints",
+        "name": "API Contract and Endpoints",
+        "prompt": "Document the complete REST API contract by analyzing frontend/src/api/index.ts and backend/routers/*.py. For each module (Departments, Positions, Employees, Attendance, Salary, Approvals, Dashboard), list all endpoints with HTTP method, path, request payload type, response type, and any query parameters. Highlight special behaviors: ListResponse<T> wrapper with optional active_total, soft-delete on DELETE /api/employees/{id} returning {ok, status}, salary calculation POST /api/salary/calculate returning SalaryResult with detailed breakdown, and approval actions (approve/reject) on POST /api/approvals/{id}/approve and /reject.",
+        "sections": []
+      },
+      {
+        "title": "approval-workflow-interaction-flow",
+        "name": "Approval Workflow Interaction Flow",
+        "prompt": "Create a detailed Mermaid sequence diagram for the approval workflow interaction. Show the flow from: (1) Employee creates an approval flow via POST /api/approvals (state='draft'), (2) Employee submits it (transitions to 'pending_manager'), (3) Manager reviews and approves (transitions to 'pending_hr'), (4) HR reviews and approves (transitions to 'approved'), with side effects in backend/routers/approvals.py creating attendance leave records or updating salary. Also show the reject paths at each stage. Reference backend/services/approval_engine.py for exact state transitions and backend/routers/approvals.py for approval action handlers.",
+        "sections": []
+      },
+      {
+        "title": "design-system-and-ui-patterns",
+        "name": "Design System and UI Patterns",
+        "prompt": "Document the custom CSS design system in frontend/src/index.css. Describe the semantic CSS classes used throughout the application: .surface-panel, .metric-card, .field, .btn-primary, .data-table, .status-badge, .info-cell. Explain how these classes provide a consistent visual language alongside Tailwind CSS v4 utility classes. Document the component patterns in frontend/src/components/ui.tsx (reusable UI primitives) and frontend/src/components/Layout.tsx (application shell with sidebar, header, role switcher). Describe how the design system supports bilingual layouts and responsive behavior.",
+        "sections": []
+      },
+      {
+        "title": "error-handling-and-feedback",
+        "name": "Error Handling and Feedback",
+        "prompt": "Document error handling patterns across the stack: backend validation errors from Pydantic schemas (backend/schemas.py field_validator for email format), FastAPI automatic validation error responses, frontend API error handling patterns in frontend/src/api/index.ts (axios error interception), and UI error feedback mechanisms. Describe what happens when invalid approval transitions are attempted, when duplicate employee_no values are submitted, when department deletion is blocked by foreign key constraints, and how the frontend surfaces these errors to users.",
+        "sections": []
+      },
+      {
+        "title": "technical-decision-rationale",
+        "name": "Technical Decision Rationale",
+        "prompt": "Document the rationale behind key technical decisions visible in the codebase: Why FastAPI + SQLAlchemy + SQLite instead of Django or a relational database? Why React + Vite + Zustand instead of Next.js or Redux? Why client-side role switching without real authentication? Why a custom CSS design system alongside Tailwind? Why multi-stage Docker build serving frontend dist from FastAPI? Why auto-seeding on every startup? Reference specific files (Dockerfile, backend/main.py, frontend/vite.config.ts, frontend/src/stores/appStore.ts) to ground each decision in observable evidence. Discuss trade-offs and when each decision might need revisiting.",
+        "sections": []
+      }
+    ]
+  },
+  {
+    "title": "06 Architecture Principles and Engineering Standards",
+    "prompt": "Analyze the repository to document architecture principles and engineering standards for HRMS-Eng. Examine the project structure, module organization (backend routers/services/models separation, frontend pages/components/stores/api layers), coding conventions (Pydantic v2 from_attributes, sys.path.insert for imports, semantic CSS classes), testing organization, and deployment architecture. Document module boundaries, dependency rules, and extension points.",
+    "sections": [
+      {
+        "title": "project-structure-and-module-boundaries",
+        "name": "Project Structure and Module Boundaries",
+        "prompt": "Document the project structure and module boundaries. Backend is organized into routers (backend/routers/*.py for HTTP handlers), services (backend/services/ for business logic like approval_engine.py and salary_calculator.py), models (backend/models.py for SQLAlchemy ORM), schemas (backend/schemas.py for Pydantic DTOs), and tests (backend/tests/ for pytest). Frontend is organized into pages (frontend/src/pages/*.tsx for route views), components (frontend/src/components/ for shared UI), stores (frontend/src/stores/ for Zustand state), api (frontend/src/api/index.ts for HTTP client), and locales (frontend/src/locales/ for i18n). Describe the allowed and disallowed dependencies between layers.",
+        "sections": []
+      },
+      {
+        "title": "backend-architecture-patterns",
+        "name": "Backend Architecture Patterns",
+        "prompt": "Document the backend architecture patterns: FastAPI dependency injection for database sessions (get_db in backend/database.py), router-based API organization with /api prefixes defined per router file, Pydantic v2 schemas for request/response validation (from_attributes = True in Config classes, not orm_mode), service layer for complex business logic (approval_engine.py state machine, salary_calculator.py tax computation), and SQLAlchemy 2.0 style with Mapped and mapped_column type annotations. Reference backend/main.py for router registration order and how the SPA fallback handler works.",
+        "sections": []
+      },
+      {
+        "title": "frontend-architecture-patterns",
+        "name": "Frontend Architecture Patterns",
+        "prompt": "Document the frontend architecture patterns: Vite 6 SPA with TypeScript, client-side routing via React Router v7 (BrowserRouter with route definitions in frontend/src/App.tsx), global state via Zustand (frontend/src/stores/appStore.ts with role and sidebar state), API layer as a centralized axios instance (frontend/src/api/index.ts with baseURL='/api'), i18n via react-i18next with JSON resource files (frontend/src/locales/en.json and zh.json), and component composition using semantic CSS classes from frontend/src/index.css. Describe the data flow from API call → store update → component re-render.",
+        "sections": []
+      },
+      {
+        "title": "coding-standards-and-conventions",
+        "name": "Coding Standards and Conventions",
+        "prompt": "Document the coding standards and conventions observed in the codebase: Python imports use sys.path.insert (backend/main.py and backend/seed.py) so modules import without package prefix (from database import engine, not from backend.database import engine). Pydantic v2 uses from_attributes = True instead of orm_mode. TypeScript path alias @/ maps to src/. Frontend components use semantic CSS classes (.surface-panel, .metric-card, etc.) rather than raw Tailwind utilities for common patterns. Backend routers set their own /api prefix. Tests live in backend/tests/ for Python and src/**/__tests__/ for TypeScript. Document any deviations or inconsistencies observed.",
+        "sections": []
+      },
+      {
+        "title": "deployment-and-runtime-architecture",
+        "name": "Deployment and Runtime Architecture",
+        "prompt": "Document the deployment architecture: multi-stage Dockerfile builds frontend with Node 20 and serves everything from a Python 3.12-slim container running uvicorn on port 8000. FastAPI serves both the REST API and the built React SPA (static files mounted at /assets, catch-all route returning index.html). docker-compose.yml configures volume mount for ./data to /app/data for SQLite persistence. The ./hrms shell script provides local lifecycle management (start, stop, restart, build, status, logs, rebuild). Document the environment variables (HRMS_DATA_DIR, HRMS_FRONTEND_DIST) and their defaults. Include a Mermaid deployment diagram.",
+        "sections": []
+      },
+      {
+        "title": "extension-points-and-future-directions",
+        "name": "Extension Points and Future Directions",
+        "prompt": "Identify extension points in the current architecture where new features could be added with minimal disruption: adding new approval types (currently leave/salary_adjust/other in ApprovalFlow.type), adding new employee fields (upgrade_sqlite_schema in backend/database.py handles schema evolution), adding new dashboard metrics (backend/routers/dashboard.py returns DashboardStats), adding new languages (frontend/src/locales/ pattern), adding new API modules (follow the router pattern in backend/routers/), and adding new frontend pages (add route in frontend/src/App.tsx and page component in frontend/src/pages/). Discuss what architectural changes would be needed for real authentication, a separate database service, or microservices decomposition.",
+        "sections": []
+      }
+    ]
+  },
+  {
+    "title": "07 Acceptance and Testing",
+    "prompt": "Analyze the repository to document acceptance criteria and testing strategy for HRMS-Eng. Examine the backend test suite (backend/tests/*.py with pytest), frontend test suite (frontend/src/**/__tests__/*.ts with Vitest and Testing Library), test configuration files (backend/pyproject.toml, frontend/vitest.config.ts, frontend/src/test/setup.ts), and the test runner script (run-tests.sh). Document test coverage by module, test fixtures and mocks, quality gates, and verification commands.",
+    "sections": [
+      {
+        "title": "test-strategy-overview",
+        "name": "Test Strategy Overview",
+        "prompt": "Document the dual test suite strategy: backend tests using pytest (5 test files in backend/tests/) and frontend tests using Vitest + Testing Library (4 test files in frontend/src/**/__tests__/). Describe the test runner entry point (run-tests.sh with backend|frontend|all subcommands), test configuration (backend/pyproject.toml for pytest, frontend/vitest.config.ts with globals: true, frontend/src/test/setup.ts for global mocks of react-i18next, localStorage, matchMedia, and IntersectionObserver). Explain why tests must run from the backend/ directory for Python tests and from the project root for frontend tests.",
+        "sections": []
+      },
+      {
+        "title": "backend-test-coverage",
+        "name": "Backend Test Coverage",
+        "prompt": "Document the backend test files and what they cover: backend/tests/test_dashboard.py (dashboard stats aggregation), backend/tests/test_departments.py (department CRUD), backend/tests/test_employees.py (employee CRUD including soft-delete behavior), backend/tests/test_positions.py (position CRUD), and backend/tests/test_workflows.py (approval workflow state transitions and salary calculation). For each test file, describe the test scenarios, fixtures used (reference backend/tests/conftest.py), assertions made, and any gaps in coverage (e.g., attendance router, salary config updates, error paths).",
+        "sections": []
+      },
+      {
+        "title": "frontend-test-coverage",
+        "name": "Frontend Test Coverage",
+        "prompt": "Document the frontend test files and what they cover: frontend/src/api/__tests__/index.test.ts (API client behavior and type definitions), frontend/src/components/__tests__/Layout.test.tsx (layout component rendering and navigation), frontend/src/locales/__tests__/locales.test.ts (i18n resource completeness and key coverage), and frontend/src/stores/__tests__/appStore.test.ts (Zustand store state changes including role switching and sidebar toggle). Describe the mocking strategy (frontend/src/test/setup.ts mocks react-i18next, localStorage, matchMedia, IntersectionObserver) and any gaps in page-level component testing.",
+        "sections": []
+      },
+      {
+        "title": "test-fixtures-and-mocks",
+        "name": "Test Fixtures and Mocks",
+        "prompt": "Document the test fixtures and mocks used across both test suites. Backend fixtures in backend/tests/conftest.py (describe what is set up — likely database sessions, test client, or seeded data). Frontend global mocks in frontend/src/test/setup.ts (react-i18next mock for i18n functions, localStorage mock for role persistence, matchMedia mock for responsive behavior, IntersectionObserver mock for scroll detection). Document the frontend file mock (frontend/src/test/__mocks__/fileMock.ts) for handling static asset imports during tests. Explain how the HRMS_DATA_DIR environment variable must be set to a temp directory before importing main in tests to avoid polluting production data.",
+        "sections": []
+      },
+      {
+        "title": "acceptance-criteria-by-feature",
+        "name": "Acceptance Criteria by Feature",
+        "prompt": "Define acceptance criteria for each major feature based on code behavior and test coverage: Employee management (create, read, update, soft-delete with status='inactive'), Department and Position hierarchy (CRUD with headcount tracking), Attendance (daily check-in/check-out recording, status classification), Salary calculation (accurate China mainland tax computation across all 7 brackets, correct handling of social insurance and housing fund deductions), Approval workflow (correct state transitions per VALID_TRANSITIONS, proper creation of leave attendance records on approval, correct role-based routing of approvals), Dashboard (accurate aggregation of employee counts, attendance rate, pending approvals, expiring contracts).",
+        "sections": []
+      },
+      {
+        "title": "verification-commands-and-quality-gates",
+        "name": "Verification Commands and Quality Gates",
+        "prompt": "Document the exact commands for running tests and any quality gates: ./run-tests.sh backend runs pytest from the backend/ directory, ./run-tests.sh frontend runs Vitest from the project root, ./run-tests.sh all runs both suites. Describe the test output location (test_logs/test_summary.txt). Document any CI/CD considerations implied by the test setup. Identify current coverage gaps (no tests for attendance router, limited error path testing, no integration tests between frontend and backend) and recommend priorities for improving test coverage.",
+        "sections": []
+      }
+    ]
+  },
+  {
+    "title": "08 Release, Changes, and Decisions",
+    "prompt": "Analyze the repository to document release workflows, change processes, and key decisions for HRMS-Eng. Examine the deployment configuration (Dockerfile, docker-compose.yml), lifecycle management script (./hrms), project documentation (AGENTS.md), version information (backend/main.py app version), and schema evolution mechanism (backend/database.py upgrade_sqlite_schema). Document the release process, versioning strategy, rollback approach, and any architectural or technical decisions recorded in the codebase.",
+    "sections": [
+      {
+        "title": "release-workflow-and-versioning",
+        "name": "Release Workflow and Versioning",
+        "prompt": "Document the release workflow: the application version is set in backend/main.py (FastAPI app version='1.0.0'). The release artifact is a Docker image built via the multi-stage Dockerfile. docker-compose.yml provides the runtime orchestration with port 8000 exposed and ./data volume for SQLite persistence. The ./hrms shell script supports local build (build_frontend, install_backend functions) and can be adapted for CI/CD pipelines. Document the release steps: build frontend (npm run build), build Docker image, tag with version, deploy via docker-compose up. Include a Mermaid diagram of the release pipeline.",
+        "sections": []
+      },
+      {
+        "title": "deployment-and-operations",
+        "name": "Deployment and Operations",
+        "prompt": "Document the deployment and operations model: the application runs as a single Docker container on port 8000 serving both API and SPA. Environment variables control behavior: HRMS_DATA_DIR (default ./data) for SQLite file location, HRMS_FRONTEND_DIST (default ../frontend/dist) for static assets. The ./hrms script provides local operations: start (background with PID file and log file), stop (kill by PID or port), restart, status (check running state), logs (tail log file), build (install deps and build frontend), rebuild (full clean rebuild). Document the data persistence strategy (SQLite file in mounted volume) and backup considerations.",
+        "sections": []
+      },
+      {
+        "title": "schema-evolution-and-migrations",
+        "name": "Schema Evolution and Migrations",
+        "prompt": "Document the schema evolution mechanism: instead of formal migration tools like Alembic, the project uses upgrade_sqlite_schema() in backend/database.py to add new columns to existing SQLite tables when the application starts. Document which columns are managed this way (employee_no, manager_id, work_location, employment_type, contract_end_date, emergency_contact, emergency_phone on employees table; manager_id, headcount_plan on departments; description, headcount_plan on positions). Explain the limitations of this approach (only additive changes, no column renames or deletions, no index management) and when a proper migration tool would become necessary.",
+        "sections": []
+      },
+      {
+        "title": "key-architectural-decisions",
+        "name": "Key Architectural Decisions",
+        "prompt": "Document key architectural decisions visible in the codebase and their rationale: (1) Using SQLite in production with auto-seeding — rationale and risks, (2) Client-side role switching without authentication — rationale (demo/simplicity) and security implications, (3) Multi-stage Docker build combining Node and Python — rationale (single artifact, simplified deployment), (4) Custom semantic CSS design system alongside Tailwind — rationale (consistent component styling), (5) Approval state machine as a simple Python dict rather than a workflow engine — rationale (sufficient for 3-state workflow). For each decision, describe the context, the chosen approach, the trade-offs, and conditions under which the decision should be revisited.",
+        "sections": []
+      },
+      {
+        "title": "rollback-and-recovery-strategy",
+        "name": "Rollback and Recovery Strategy",
+        "prompt": "Document the rollback and recovery strategy: since the application uses a SQLite database file in a mounted Docker volume, recovery involves restoring the database file from backup. The Docker image itself is stateless (all state in the SQLite file and volume). Document the rollback process for code changes (redeploy previous Docker image tag) and data changes (restore SQLite file from backup). Describe the risks of auto-seeding (backend/main.py calls seed() on every startup, which could overwrite data if not idempotent — verify behavior in backend/seed.py). Document the lack of formal backup automation and recommend practices.",
+        "sections": []
+      },
+      {
+        "title": "risk-controls-and-known-issues",
+        "name": "Risk Controls and Known Issues",
+        "prompt": "Document risk controls and known issues: (1) No real authentication — anyone can switch to HR role in the UI, though backend approval router enforces some role checks, (2) Auto-seeding on startup could interfere with production data if seed.py is not idempotent, (3) SQLite limitations (single-writer, no built-in replication) for multi-user deployments, (4) No input sanitization beyond Pydantic validation — assess SQL injection risks in backend/routers/*.py, (5) No audit logging for sensitive operations (salary changes, approval decisions), (6) Hardcoded tax brackets in salary_calculator.py require code changes for tax law updates. For each risk, describe the current mitigation and recommended improvements.",
         "sections": []
       }
     ]

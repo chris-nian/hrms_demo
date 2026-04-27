@@ -11,7 +11,7 @@ TAX_BRACKETS = [
     (float('inf'), 0.45, 15160),
 ]
 
-TAX_THRESHOLD = 5000  # 个税起征点
+TAX_THRESHOLD = 5000  # Individual income tax threshold
 
 
 def calculate_tax(taxable_income: float) -> float:

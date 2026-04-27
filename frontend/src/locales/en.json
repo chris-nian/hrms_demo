@@ -5,7 +5,8 @@
     "departments": "Organization",
     "attendance": "Attendance Ledger",
     "salary": "Payroll Management",
-    "approvals": "Workflow Center"
+    "approvals": "Workflow Center",
+    "recruiting": "Recruiting Board"
   },
   "common": {
     "search": "Search",
@@ -223,5 +224,27 @@
     "approvedHint": "Completed",
     "rejectedHint": "Closed",
     "empty": "No workflow records are available in the current queue."
+  },
+  "recruiting": {
+    "title": "Recruiting Board",
+    "subtitle": "Manage the full candidate lifecycle from application to hire, tracking progress across every stage.",
+    "addCandidate": "Add Candidate",
+    "editCandidate": "Edit Candidate",
+    "deleteConfirm": "Delete this candidate?",
+    "position": "Position",
+    "owner": "Owner",
+    "source": "Source",
+    "notes": "Notes",
+    "stage": "Stage",
+    "empty": "No candidates in this stage.",
+    "totalCandidates": "Total Candidates",
+    "stages": {
+      "new": "New",
+      "screening": "Screening",
+      "interview": "Interview",
+      "offer": "Offer",
+      "hired": "Hired",
+      "rejected": "Rejected"
+    }
   }
 }

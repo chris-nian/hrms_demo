@@ -1,6 +1,72 @@
 {
 	"mcpServers": {
-		"molly-wiki": {
+		"CoStrict Knowledge Base": {
+			"url": "https://mollywiki.art/api/mcp/sse",
+			"headers": {
+				"Authorization": "Bearer awk_cc1a75bed6bfc2db7fcda0f88c5372755724077cafa1b1c2b1f086638d7066d5"
+			},
+			"alwaysAllow": [
+				"list_spaces",
+				"list_documents",
+				"get_document"
+			]
+		},
+		"Enterprise Security Development Standards": {
+			"url": "https://mollywiki.art/api/mcp/sse",
+			"headers": {
+				"Authorization": "Bearer awk_cc1a75bed6bfc2db7fcda0f88c5372755724077cafa1b1c2b1f086638d7066d5"
+			},
+			"alwaysAllow": [
+				"list_spaces",
+				"list_documents",
+				"get_document"
+			]
+		},
+		"Internal HR system": {
+			"url": "https://mollywiki.art/api/mcp/sse",
+			"headers": {
+				"Authorization": "Bearer awk_cc1a75bed6bfc2db7fcda0f88c5372755724077cafa1b1c2b1f086638d7066d5"
+			},
+			"alwaysAllow": [
+				"list_spaces",
+				"list_documents",
+				"get_document"
+			]
+		},
+		"Internal code audit system": {
+			"url": "https://mollywiki.art/api/mcp/sse",
+			"headers": {
+				"Authorization": "Bearer awk_cc1a75bed6bfc2db7fcda0f88c5372755724077cafa1b1c2b1f086638d7066d5"
+			},
+			"alwaysAllow": [
+				"list_spaces",
+				"list_documents",
+				"get_document"
+			]
+		},
+		"Feature release platform": {
+			"url": "https://mollywiki.art/api/mcp/sse",
+			"headers": {
+				"Authorization": "Bearer awk_cc1a75bed6bfc2db7fcda0f88c5372755724077cafa1b1c2b1f086638d7066d5"
+			},
+			"alwaysAllow": [
+				"list_spaces",
+				"list_documents",
+				"get_document"
+			]
+		},
+		"Interaction design platform": {
+			"url": "https://mollywiki.art/api/mcp/sse",
+			"headers": {
+				"Authorization": "Bearer awk_cc1a75bed6bfc2db7fcda0f88c5372755724077cafa1b1c2b1f086638d7066d5"
+			},
+			"alwaysAllow": [
+				"list_spaces",
+				"list_documents",
+				"get_document"
+			]
+		},
+		"Visual design platform": {
 			"url": "https://mollywiki.art/api/mcp/sse",
 			"headers": {
 				"Authorization": "Bearer awk_cc1a75bed6bfc2db7fcda0f88c5372755724077cafa1b1c2b1f086638d7066d5"

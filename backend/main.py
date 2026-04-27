@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from database import engine, Base, upgrade_sqlite_schema
-from routers import departments, positions, employees, attendance, salary, approvals, dashboard
+from routers import departments, positions, employees, attendance, salary, approvals, dashboard, candidates
 from seed import seed
 
 app = FastAPI(title="HRMS API", version="1.0.0")
@@ -23,6 +23,7 @@ app.include_router(attendance.router)
 app.include_router(salary.router)
 app.include_router(approvals.router)
 app.include_router(dashboard.router)
+app.include_router(candidates.router)
 
 # Serve React static files
 frontend_dist = os.environ.get(

@@ -181,3 +181,27 @@ export const rejectFlow = (id: number, data: { approver_id: number; comment?: st
 
 // Dashboard
 export const getDashboardStats = (): Promise<DashboardStats> => api.get('/dashboard/stats').then(r => r.data)
+
+export interface Candidate {
+  id: number
+  name: string
+  email?: string
+  phone?: string
+  position_id?: number | null
+  owner_id?: number | null
+  stage: string
+  source?: string
+  notes?: string
+  position_title?: string
+  owner_name?: string
+  created_at: string
+  updated_at: string
+}
+
+export type CandidatePayload = Partial<Omit<Candidate, 'id' | 'created_at' | 'updated_at' | 'position_title' | 'owner_name'>>
+
+export const getCandidates = (params?: Record<string, unknown>): Promise<ListResponse<Candidate>> => api.get('/candidates', { params }).then(r => r.data)
+export const getCandidate = (id: number): Promise<Candidate> => api.get(`/candidates/${id}`).then(r => r.data)
+export const createCandidate = (data: CandidatePayload): Promise<Candidate> => api.post('/candidates', data).then(r => r.data)
+export const updateCandidate = (id: number, data: CandidatePayload): Promise<Candidate> => api.put(`/candidates/${id}`, data).then(r => r.data)
+export const deleteCandidate = (id: number): Promise<{ ok: boolean }> => api.delete(`/candidates/${id}`).then(r => r.data)

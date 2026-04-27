@@ -83,6 +83,18 @@ const navItems: NavItem[] = [
       </svg>
     ),
   },
+  {
+    path: '/recruiting',
+    titleKey: 'nav.recruiting',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="10" cy="7" r="4" />
+        <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <path d="M20 8l2 2-2 2" />
+        <path d="M22 10h-4" />
+      </svg>
+    ),
+  },
 ]
 
 const roles = [
@@ -98,6 +110,7 @@ const pageSubtitleKeys: Record<string, string> = {
   '/attendance': 'attendance.subtitle',
   '/salary': 'salary.subtitle',
   '/approvals': 'approval.subtitle',
+  '/recruiting': 'recruiting.subtitle',
 }
 
 const pageTitleKeys: Record<string, string> = {
@@ -107,6 +120,7 @@ const pageTitleKeys: Record<string, string> = {
   '/attendance': 'attendance.title',
   '/salary': 'salary.title',
   '/approvals': 'approval.title',
+  '/recruiting': 'recruiting.title',
 }
 
 export default function Layout() {

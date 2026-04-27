@@ -5,7 +5,8 @@
     "departments": "组织架构",
     "attendance": "考勤台账",
     "salary": "薪酬管理",
-    "approvals": "流程中心"
+    "approvals": "流程中心",
+    "recruiting": "招聘看板"
   },
   "common": {
     "search": "搜索",
@@ -223,5 +224,27 @@
     "approvedHint": "流程已完成",
     "rejectedHint": "流程已终止",
     "empty": "当前队列没有审批记录。"
+  },
+  "recruiting": {
+    "title": "招聘看板",
+    "subtitle": "管理候选人全生命周期，从简历投递到录用确认，清晰追踪每个阶段的进展。",
+    "addCandidate": "新增候选人",
+    "editCandidate": "编辑候选人",
+    "deleteConfirm": "确认删除该候选人吗？",
+    "position": "应聘职位",
+    "owner": "负责人",
+    "source": "来源渠道",
+    "notes": "备注",
+    "stage": "当前阶段",
+    "empty": "当前阶段暂无候选人。",
+    "totalCandidates": "候选人总数",
+    "stages": {
+      "new": "新简历",
+      "screening": "初筛",
+      "interview": "面试",
+      "offer": "Offer",
+      "hired": "已录用",
+      "rejected": "已拒绝"
+    }
   }
 }

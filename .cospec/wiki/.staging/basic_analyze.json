@@ -1,140 +1,159 @@
 {
-  "classifyName": "Applications",
+  "classifyName": "Application",
   "confidence": "High",
   "techStack": [
+    "Python",
     "FastAPI",
     "SQLAlchemy",
-    "SQLite",
-    "Pydantic",
+    "Pydantic v2",
     "Uvicorn",
+    "SQLite",
     "React 18",
     "TypeScript",
-    "Vite",
+    "Vite 6",
     "Tailwind CSS v4",
-    "React Router v7",
     "Zustand",
+    "React Router v7",
     "react-i18next",
     "Axios",
     "Recharts",
-    "Docker"
+    "Docker",
+    "pytest",
+    "Vitest",
+    "Testing Library"
   ],
   "projectScale": "Small",
   "entrypoints": [
     "backend/main.py",
     "frontend/src/main.tsx",
-    "hrms"
+    "./hrms",
+    "Dockerfile",
+    "docker-compose.yml"
   ],
   "modules": [
     {
-      "name": "department_management",
+      "name": "Dashboard",
       "relatedSources": [
-        "backend/routers/departments.py",
-        "backend/models.py",
-        "backend/schemas.py",
-        "frontend/src/pages/Departments.tsx"
+        "backend/routers/dashboard.py",
+        "frontend/src/pages/Dashboard.tsx"
       ]
     },
     {
-      "name": "position_management",
-      "relatedSources": [
-        "backend/routers/positions.py",
-        "backend/models.py",
-        "backend/schemas.py",
-        "frontend/src/pages/Departments.tsx"
-      ]
-    },
-    {
-      "name": "employee_management",
+      "name": "Employees",
       "relatedSources": [
         "backend/routers/employees.py",
-        "backend/models.py",
-        "backend/schemas.py",
         "frontend/src/pages/Employees.tsx"
       ]
     },
     {
-      "name": "attendance_management",
+      "name": "Departments",
+      "relatedSources": [
+        "backend/routers/departments.py",
+        "frontend/src/pages/Departments.tsx"
+      ]
+    },
+    {
+      "name": "Positions",
+      "relatedSources": [
+        "backend/routers/positions.py",
+        "frontend/src/pages/Departments.tsx"
+      ]
+    },
+    {
+      "name": "Attendance",
       "relatedSources": [
         "backend/routers/attendance.py",
-        "backend/models.py",
-        "backend/schemas.py",
         "frontend/src/pages/Attendance.tsx"
       ]
     },
     {
-      "name": "salary_management",
+      "name": "Salary",
       "relatedSources": [
         "backend/routers/salary.py",
-        "backend/models.py",
-        "backend/schemas.py",
         "backend/services/salary_calculator.py",
         "frontend/src/pages/Salary.tsx"
       ]
     },
     {
-      "name": "approval_workflow",
+      "name": "Approvals",
       "relatedSources": [
         "backend/routers/approvals.py",
-        "backend/models.py",
-        "backend/schemas.py",
         "backend/services/approval_engine.py",
         "frontend/src/pages/Approvals.tsx"
       ]
     },
     {
-      "name": "dashboard",
-      "relatedSources": [
-        "backend/routers/dashboard.py",
-        "backend/schemas.py",
-        "frontend/src/pages/Dashboard.tsx"
-      ]
-    },
-    {
-      "name": "frontend_infrastructure",
-      "relatedSources": [
-        "frontend/src/components/Layout.tsx",
-        "frontend/src/components/ui.tsx",
-        "frontend/src/stores/appStore.ts",
-        "frontend/src/api/index.ts",
-        "frontend/src/i18n.ts",
-        "frontend/src/locales/en.json",
-        "frontend/src/locales/zh.json",
-        "frontend/src/index.css",
-        "frontend/src/App.tsx"
-      ]
-    },
-    {
-      "name": "database_and_seeding",
+      "name": "Database & Models",
       "relatedSources": [
         "backend/database.py",
+        "backend/models.py",
+        "backend/schemas.py",
         "backend/seed.py"
       ]
     },
     {
-      "name": "deployment_and_devops",
+      "name": "Frontend Shell",
       "relatedSources": [
+        "frontend/src/App.tsx",
+        "frontend/src/main.tsx",
+        "frontend/src/components/Layout.tsx",
+        "frontend/src/components/ui.tsx",
+        "frontend/src/stores/appStore.ts",
+        "frontend/src/i18n.ts",
+        "frontend/src/api/index.ts",
+        "frontend/src/index.css"
+      ]
+    },
+    {
+      "name": "i18n Locales",
+      "relatedSources": [
+        "frontend/src/locales/en.json",
+        "frontend/src/locales/zh.json"
+      ]
+    },
+    {
+      "name": "Infrastructure",
+      "relatedSources": [
+        "hrms",
         "Dockerfile",
         "docker-compose.yml",
-        "hrms",
-        ".dockerignore"
+        "run-tests.sh",
+        "AGENTS.md"
+      ]
+    },
+    {
+      "name": "Backend Tests",
+      "relatedSources": [
+        "backend/tests/conftest.py",
+        "backend/tests/test_dashboard.py",
+        "backend/tests/test_departments.py",
+        "backend/tests/test_employees.py",
+        "backend/tests/test_positions.py",
+        "backend/tests/test_workflows.py"
+      ]
+    },
+    {
+      "name": "Frontend Tests",
+      "relatedSources": [
+        "frontend/src/api/__tests__/index.test.ts",
+        "frontend/src/components/__tests__/Layout.test.tsx",
+        "frontend/src/locales/__tests__/locales.test.ts",
+        "frontend/src/stores/__tests__/appStore.test.ts",
+        "frontend/src/test/setup.ts"
       ]
     }
   ],
-  "complexityLevel": "Low",
-  "recommendedStrategy": "Quick",
+  "complexityLevel": "Medium",
+  "recommendedStrategy": "Standard",
   "evidence": [
-    "Complete full-stack application with React frontend serving end users via browser and FastAPI backend providing RESTful API endpoints",
-    "Independent deployment supported via Dockerfile (multi-stage build) and docker-compose.yml with port 8000 exposed",
-    "7 distinct business modules implementing HR domain logic: departments, positions, employees, attendance, salary, approvals, and dashboard",
-    "Clear separation of concerns: backend uses router/service/model/schema layering; frontend uses pages/components/stores/api layering",
-    "Approval workflow implements a finite state machine (draft -> pending_manager -> pending_hr -> approved/rejected) indicating moderate business logic complexity",
-    "Salary calculator implements China mainland individual income tax brackets with 7 progressive tiers",
-    "Bilingual i18n support (Chinese/English) with localStorage persistence for language preference",
-    "Role-based UI (employee/manager/hr) with localStorage persistence for role switching",
-    "SQLite database with auto-seeding of demo data on first startup indicates a self-contained demo-ready application",
-    "Custom bash management script (hrms) provides start/stop/restart/build/logs commands for streamlined development workflow",
-    "Small project scale: ~30 source files total across backend (7 routers, 2 services, 1 model file, 1 schema file, 1 database config, 1 seed) and frontend (6 pages, 2 components, 1 store, 1 API client, i18n setup)",
-    "No test framework configured, no CI/CD pipeline defined, minimal DevOps configuration"
+    "Full-stack web application with FastAPI backend serving REST API endpoints and React SPA frontend with client-side routing",
+    "Multi-stage Dockerfile builds frontend and serves both layers from a single container on port 8000",
+    "Complete business logic implementing HRMS domain: employee management, department hierarchy, position tracking, attendance recording, salary calculation with China mainland tax rules, and multi-level approval workflow (draft → pending_manager → pending_hr → approved/rejected)",
+    "SQLite database with SQLAlchemy ORM, auto-seeding with realistic enterprise demo data (8 departments, 30+ positions, 80+ employees)",
+    "Role-based UI using Zustand store (employee/manager/hr roles) with Chinese/English i18n support via react-i18next",
+    "Custom CSS design system with semantic classes (.surface-panel, .metric-card, .data-table, etc.) complemented by Tailwind CSS v4",
+    "Dedicated management shell script (./hrms) providing start/stop/restart/build/status/logs lifecycle commands",
+    "Dual test suites: pytest for backend (5 test files) and Vitest + Testing Library for frontend (4 test files)"
   ],
-  "summary": "HRMS (人力资源管理系统) is a small-scale, full-stack web application for human resource management. It features a Python FastAPI backend with SQLAlchemy ORM and SQLite database, paired with a React 18 + TypeScript + Vite + Tailwind CSS v4 frontend. The application provides 7 core business modules: department management, position management, employee management, attendance tracking, salary calculation (with China mainland tax rules), approval workflow (with state machine engine), and an analytics dashboard. The project supports bilingual i18n (Chinese/English), role-based access (employee/manager/hr), and containerized deployment via Docker. It is designed as a self-contained demo-ready system with auto-seeded data and a custom bash management script for streamlined development operations."
+  "summary": "HRMS-Eng is a full-stack Human Resource Management System application built with a Python FastAPI backend and React TypeScript frontend. It provides comprehensive HR management capabilities including employee lifecycle management (with soft-delete), department and position hierarchies, attendance tracking, salary calculation with China mainland tax rules (progressive tax brackets, social insurance, housing fund), and a multi-level approval workflow engine (draft → pending_manager → pending_hr → approved/rejected). The application features bilingual support (Chinese/English), role-based views for employees/managers/HR staff, and a dashboard with analytics powered by Recharts. It uses SQLite for data persistence, Docker for containerized deployment, and includes automated demo data seeding. The project follows a clean architecture with separate backend routers, services, and models, and a frontend organized by pages, components, stores, and API layers."
 }

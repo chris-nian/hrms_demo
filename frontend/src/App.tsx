@@ -6,6 +6,7 @@ import Departments from './pages/Departments'
 import Attendance from './pages/Attendance'
 import Salary from './pages/Salary'
 import Approvals from './pages/Approvals'
+import Recruiting from './pages/Recruiting'
 import './i18n'
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="attendance" element={<Attendance />} />
         <Route path="salary" element={<Salary />} />
         <Route path="approvals" element={<Approvals />} />
+        <Route path="recruiting" element={<Recruiting />} />
       </Route>
     </Routes>
   )

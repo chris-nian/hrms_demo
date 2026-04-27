@@ -7,38 +7,38 @@ from datetime import date, datetime, timedelta
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from database import Base, SessionLocal, engine
-from models import ApprovalFlow, ApprovalRecord, Attendance, Department, Employee, Position, SalaryConfig
+from models import ApprovalFlow, ApprovalRecord, Attendance, Candidate, Department, Employee, Position, SalaryConfig
 
 DEPARTMENTS = [
-    ("总裁办公室", "负责公司治理、经营协调与重点项目推进", 6),
-    ("人力资源部", "负责人力规划、招聘、绩效、薪酬与员工关系", 8),
-    ("财务管理部", "负责预算、核算、税务、资金与经营分析", 7),
-    ("产品管理部", "负责产品规划、需求管理与业务增长策略", 9),
-    ("技术研发部", "负责平台研发、架构治理、质量保障与交付效率", 20),
-    ("客户成功部", "负责客户交付、续约经营与服务质量管理", 12),
-    ("市场销售部", "负责品牌传播、商机拓展与销售转化", 14),
-    ("行政采购部", "负责办公行政、资产采购与供应商管理", 6),
+    ("Executive Office", "Corporate governance, strategic coordination, and key project oversight", 6),
+    ("Human Resources", "Workforce planning, recruiting, performance, compensation, and employee relations", 8),
+    ("Finance & Accounting", "Budgeting, financial reporting, treasury, tax compliance, and business analysis", 7),
+    ("Product Management", "Product strategy, roadmap planning, and business growth initiatives", 9),
+    ("Engineering", "Platform development, architecture, quality assurance, and delivery efficiency", 20),
+    ("Customer Success", "Client delivery, renewal management, and service quality", 12),
+    ("Sales & Marketing", "Brand awareness, lead generation, and revenue conversion", 14),
+    ("Administration & Procurement", "Office operations, asset management, and vendor coordination", 6),
 ]
 
 POSITIONS = {
-    "总裁办公室": [("经营分析经理", "M2", 2), ("总经理助理", "P5", 2), ("项目管理专员", "P4", 2)],
-    "人力资源部": [("HR 负责人", "M3", 1), ("招聘经理", "M1", 2), ("薪酬绩效专员", "P5", 3), ("员工关系专员", "P4", 2)],
-    "财务管理部": [("财务经理", "M2", 1), ("会计主管", "M1", 2), ("财务分析师", "P5", 2), ("出纳", "P4", 2)],
-    "产品管理部": [("产品负责人", "M2", 1), ("高级产品经理", "P7", 3), ("产品经理", "P6", 4), ("数据分析师", "P5", 1)],
-    "技术研发部": [("研发负责人", "M3", 1), ("后端工程师", "P6", 6), ("前端工程师", "P6", 4), ("测试工程师", "P5", 3), ("运维工程师", "P5", 2), ("架构师", "P8", 2)],
-    "客户成功部": [("客户成功经理", "M1", 3), ("实施顾问", "P5", 4), ("技术支持工程师", "P5", 3), ("服务运营专员", "P4", 2)],
-    "市场销售部": [("销售总监", "M3", 1), ("大客户经理", "P6", 5), ("市场经理", "M1", 2), ("品牌策划", "P5", 2), ("销售运营", "P4", 2)],
-    "行政采购部": [("行政经理", "M1", 1), ("采购专员", "P4", 2), ("行政专员", "P3", 3)],
+    "Executive Office": [("Business Analysis Manager", "M2", 2), ("Executive Assistant", "P5", 2), ("Project Coordinator", "P4", 2)],
+    "Human Resources": [("HR Director", "M3", 1), ("Recruiting Manager", "M1", 2), ("Compensation & Benefits Specialist", "P5", 3), ("Employee Relations Specialist", "P4", 2)],
+    "Finance & Accounting": [("Finance Manager", "M2", 1), ("Accounting Supervisor", "M1", 2), ("Financial Analyst", "P5", 2), ("Treasury Analyst", "P4", 2)],
+    "Product Management": [("Head of Product", "M2", 1), ("Senior Product Manager", "P7", 3), ("Product Manager", "P6", 4), ("Data Analyst", "P5", 1)],
+    "Engineering": [("VP of Engineering", "M3", 1), ("Backend Engineer", "P6", 6), ("Frontend Engineer", "P6", 4), ("QA Engineer", "P5", 3), ("DevOps Engineer", "P5", 2), ("Solutions Architect", "P8", 2)],
+    "Customer Success": [("Customer Success Manager", "M1", 3), ("Implementation Consultant", "P5", 4), ("Technical Support Engineer", "P5", 3), ("Service Operations Specialist", "P4", 2)],
+    "Sales & Marketing": [("Sales Director", "M3", 1), ("Key Account Manager", "P6", 5), ("Marketing Manager", "M1", 2), ("Brand Strategist", "P5", 2), ("Sales Operations Analyst", "P4", 2)],
+    "Administration & Procurement": [("Office Manager", "M1", 1), ("Procurement Specialist", "P4", 2), ("Administrative Assistant", "P3", 3)],
 }
 
-LAST_NAMES = ["陈", "李", "王", "张", "刘", "赵", "周", "吴", "孙", "马", "朱", "胡", "林", "郭", "何", "高"]
-FIRST_NAMES = ["明轩", "思远", "嘉怡", "雨桐", "子涵", "梓萱", "俊杰", "诗涵", "一诺", "浩然", "欣怡", "文博", "若曦", "泽宇", "佳宁", "景行"]
-LOCATIONS = ["上海总部", "北京分部", "深圳分部", "成都交付中心", "杭州研发中心"]
+LAST_NAMES = ["Anderson", "Brown", "Clark", "Davis", "Evans", "Foster", "Garcia", "Harris", "Jackson", "Kim", "Lee", "Martinez", "Nelson", "O'Brien", "Parker", "Robinson"]
+FIRST_NAMES = ["James", "Emily", "Michael", "Sarah", "David", "Jessica", "Robert", "Ashley", "Daniel", "Amanda", "William", "Stephanie", "Andrew", "Nicole", "Christopher", "Rachel"]
+LOCATIONS = ["New York HQ", "San Francisco Office", "London Branch", "Singapore Center", "Austin Campus"]
 EMPLOYMENT_TYPES = ["full_time", "contractor", "intern"]
 
 
 def _name(index: int) -> str:
-    return f"{LAST_NAMES[index % len(LAST_NAMES)]}{FIRST_NAMES[(index * 3) % len(FIRST_NAMES)]}"
+    return f"{FIRST_NAMES[(index * 3) % len(FIRST_NAMES)]} {LAST_NAMES[index % len(LAST_NAMES)]}"
 
 
 def _backfill_existing(db):
@@ -57,7 +57,7 @@ def _backfill_existing(db):
 
     for pos in positions:
         if pos.description is None:
-            pos.description = f"{pos.title}负责岗位职责与业务目标交付。"
+            pos.description = f"Responsible for delivering on core duties and business objectives as {pos.title}."
         if not pos.headcount_plan:
             pos.headcount_plan = max(2, db.query(Employee).filter(Employee.position_id == pos.id).count() + 1)
 
@@ -76,7 +76,7 @@ def _backfill_existing(db):
         if not emp.emergency_contact:
             emp.emergency_contact = _name(index + 6)
         if not emp.emergency_phone:
-            emp.emergency_phone = f"15{random.randint(100000000, 999999999)}"
+            emp.emergency_phone = f"+1{random.randint(2000000000, 9999999999)}"
         if not db.query(SalaryConfig).filter(SalaryConfig.employee_id == emp.id).first():
             db.add(SalaryConfig(
                 employee_id=emp.id,
@@ -98,10 +98,10 @@ def _expand_existing(db, target_count: int = 64):
     if not positions:
         for dept in departments:
             pos = Position(
-                title=f"{dept.name}专员",
+                title=f"{dept.name} Specialist",
                 department_id=dept.id,
                 level="P4",
-                description=f"{dept.name}基础岗位",
+                description=f"Generalist role within {dept.name}",
                 headcount_plan=4,
             )
             db.add(pos)
@@ -138,7 +138,7 @@ def _expand_existing(db, target_count: int = 64):
             employee_no=employee_no,
             name=_name(i),
             email=f"emp{1001 + i}@horizon-people.com",
-            phone=f"13{random.randint(100000000, 999999999)}",
+            phone=f"+1{random.randint(2000000000, 9999999999)}",
             gender="female" if i % 3 == 0 else "male",
             department_id=dept.id,
             position_id=pos.id,
@@ -148,7 +148,7 @@ def _expand_existing(db, target_count: int = 64):
             hire_date=date(2021 + (i % 4), (i % 12) + 1, (i % 25) + 1),
             contract_end_date=date.today() + timedelta(days=45 + (i * 13) % 420),
             emergency_contact=_name(i + 8),
-            emergency_phone=f"15{random.randint(100000000, 999999999)}",
+            emergency_phone=f"+1{random.randint(2000000000, 9999999999)}",
             status="inactive" if i % 23 == 0 else "active",
             role=role,
         )
@@ -184,6 +184,38 @@ def _expand_existing(db, target_count: int = 64):
     db.commit()
 
 
+def _seed_candidates(db, employees=None, positions=None):
+    if employees is None:
+        employees = db.query(Employee).order_by(Employee.id.asc()).all()
+    if positions is None:
+        positions = db.query(Position).order_by(Position.id.asc()).all()
+    candidate_specs = [
+        ("Ryan Mitchell", "ryan.mitchell@example.com", "+12025551001", "new", "LinkedIn", "Recent CS graduate with strong fundamentals"),
+        ("Sarah Jenkins", "sarah.jenkins@example.com", "+12025551002", "screening", "Indeed", "3 years of product management experience"),
+        ("David Chen", "david.chen@example.com", "+12025551003", "interview", "Referral", "Senior backend developer, Python & Go"),
+        ("Emily Watson", "emily.watson@example.com", "+12025551004", "interview", "Referral", "Frontend tech lead, React specialist"),
+        ("Brian Foster", "brian.foster@example.com", "+12025551005", "offer", "Glassdoor", "Full-stack engineer with DevOps skills"),
+        ("Lauren Davis", "lauren.davis@example.com", "+12025551006", "offer", "LinkedIn", "Data analytics and ML background"),
+        ("Mark Robinson", "mark.robinson@example.com", "+12025551007", "hired", "Campus Recruiting", "Accepted offer, onboarding next week"),
+        ("Julia Nelson", "julia.nelson@example.com", "+12025551008", "rejected", "Indeed", "Skills did not match current needs"),
+        ("Kevin Park", "kevin.park@example.com", "+12025551009", "new", "Glassdoor", "5 years of DevOps and cloud experience"),
+        ("Hannah Lee", "hannah.lee@example.com", "+12025551010", "screening", "Referral", "QA engineer with automation expertise"),
+    ]
+    for i, (name, email, phone, stage, source, notes) in enumerate(candidate_specs):
+        pos = positions[i % len(positions)] if positions else None
+        owner = employees[i % len(employees)] if employees else None
+        db.add(Candidate(
+            name=name,
+            email=email,
+            phone=phone,
+            position_id=pos.id if pos else None,
+            owner_id=owner.id if owner else None,
+            stage=stage,
+            source=source,
+            notes=notes,
+        ))
+
+
 def seed():
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
@@ -191,6 +223,8 @@ def seed():
     if db.query(Employee).count() > 0 or db.query(Department).count() > 0:
         _backfill_existing(db)
         _expand_existing(db)
+        if db.query(Candidate).count() == 0:
+            _seed_candidates(db)
         db.close()
         return
 
@@ -210,7 +244,7 @@ def seed():
                 title=title,
                 department_id=dept.id,
                 level=level,
-                description=f"{title}负责{dept.name}相关岗位职责与业务目标交付。",
+                description=f"Responsible for delivering on core duties and business objectives as {title} within {dept.name}.",
                 headcount_plan=plan,
             )
             db.add(pos)
@@ -229,14 +263,14 @@ def seed():
         role = "employee"
         if i in [1, 18, 24, 31, 38, 45, 52, 59]:
             role = "manager"
-        if dept.name == "人力资源部" and i % 8 in [1, 5]:
+        if dept.name == "Human Resources" and i % 8 in [1, 5]:
             role = "hr"
         status = "inactive" if i in [12, 27, 49, 61] else "active"
         emp = Employee(
             employee_no=f"EMP{1001 + i}",
             name=_name(i),
             email=f"emp{1001 + i}@{email_domains[i % len(email_domains)]}",
-            phone=f"13{random.randint(100000000, 999999999)}",
+            phone=f"+1{random.randint(2000000000, 9999999999)}",
             gender="female" if i % 3 == 0 else "male",
             avatar=f"https://api.dicebear.com/7.x/notionists/svg?seed=emp{1001 + i}",
             department_id=dept.id,
@@ -246,7 +280,7 @@ def seed():
             hire_date=date(2020 + (i % 5), (i % 12) + 1, (i % 25) + 1),
             contract_end_date=date.today() + timedelta(days=20 + (i * 11) % 520),
             emergency_contact=f"{_name(i + 4)}",
-            emergency_phone=f"15{random.randint(100000000, 999999999)}",
+            emergency_phone=f"+1{random.randint(2000000000, 9999999999)}",
             status=status,
             role=role,
         )
@@ -299,10 +333,10 @@ def seed():
             db.add(Attendance(employee_id=emp.id, date=work_date, check_in=check_in, check_out=check_out, status=status))
 
     approval_specs = [
-        ("请假申请 - 年假2天", "leave", employees[3], "pending_manager", {"leave_type": "annual", "start_date": str(today + timedelta(days=5)), "end_date": str(today + timedelta(days=6)), "reason": "家庭安排"}),
-        ("薪资调整申请", "salary_adjust", employees[10], "pending_hr", {"amount": 1800, "reason": "季度绩效优秀"}),
-        ("请假申请 - 病假1天", "leave", employees[20], "approved", {"leave_type": "sick", "start_date": str(today - timedelta(days=3)), "end_date": str(today - timedelta(days=3)), "reason": "身体不适"}),
-        ("岗位津贴申请", "other", employees[36], "rejected", {"reason": "临时项目津贴申请"}),
+        ("Leave Request - Annual Leave 2 Days", "leave", employees[3], "pending_manager", {"leave_type": "annual", "start_date": str(today + timedelta(days=5)), "end_date": str(today + timedelta(days=6)), "reason": "Family event"}),
+        ("Salary Adjustment Request", "salary_adjust", employees[10], "pending_hr", {"amount": 1800, "reason": "Outstanding quarterly performance"}),
+        ("Leave Request - Sick Leave 1 Day", "leave", employees[20], "approved", {"leave_type": "sick", "start_date": str(today - timedelta(days=3)), "end_date": str(today - timedelta(days=3)), "reason": "Medical appointment"}),
+        ("Project Allowance Request", "other", employees[36], "rejected", {"reason": "Temporary project assignment allowance"}),
     ]
     for title, flow_type, applicant, state, content in approval_specs:
         manager = db.query(Employee).filter(Employee.id == applicant.manager_id).first() or fallback_manager
@@ -318,13 +352,15 @@ def seed():
         )
         db.add(flow)
         db.flush()
-        db.add(ApprovalRecord(flow_id=flow.id, approver_id=applicant.id, action="submit", comment="提交申请", created_at=flow.created_at))
+        db.add(ApprovalRecord(flow_id=flow.id, approver_id=applicant.id, action="submit", comment="Submitted for approval", created_at=flow.created_at))
         if state in ["pending_hr", "approved"]:
-            db.add(ApprovalRecord(flow_id=flow.id, approver_id=manager.id, action="approve", comment="同意提交 HR 复核", created_at=flow.created_at + timedelta(hours=3)))
+            db.add(ApprovalRecord(flow_id=flow.id, approver_id=manager.id, action="approve", comment="Approved, forwarding to HR for review", created_at=flow.created_at + timedelta(hours=3)))
         if state == "approved":
-            db.add(ApprovalRecord(flow_id=flow.id, approver_id=fallback_hr.id, action="approve", comment="已完成复核", created_at=flow.created_at + timedelta(hours=7)))
+            db.add(ApprovalRecord(flow_id=flow.id, approver_id=fallback_hr.id, action="approve", comment="Review completed", created_at=flow.created_at + timedelta(hours=7)))
         if state == "rejected":
-            db.add(ApprovalRecord(flow_id=flow.id, approver_id=manager.id, action="reject", comment="暂不符合当前政策", created_at=flow.created_at + timedelta(hours=2)))
+            db.add(ApprovalRecord(flow_id=flow.id, approver_id=manager.id, action="reject", comment="Does not meet current policy requirements", created_at=flow.created_at + timedelta(hours=2)))
+
+    _seed_candidates(db, employees, positions)
 
     db.commit()
     db.close()
