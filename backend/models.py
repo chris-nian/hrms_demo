@@ -135,8 +135,105 @@ class Candidate(Base):
     stage: Mapped[str] = mapped_column(String(30), default="new")
     source: Mapped[str | None] = mapped_column(String(100), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    employee_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("employees.id"), nullable=True)
+    current_stage_entered_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    rejection_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     position: Mapped["Position | None"] = relationship()
-    owner: Mapped["Employee | None"] = relationship()
+    owner: Mapped["Employee | None"] = relationship(foreign_keys=[owner_id])
+    employee: Mapped["Employee | None"] = relationship(foreign_keys=[employee_id])
+    interview_rounds: Mapped[list["InterviewRound"]] = relationship(back_populates="candidate", cascade="all, delete-orphan")
+    offers: Mapped[list["Offer"]] = relationship(back_populates="candidate", cascade="all, delete-orphan")
+
+
+class InterviewRound(Base):
+    __tablename__ = "interview_rounds"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    candidate_id: Mapped[int] = mapped_column(Integer, ForeignKey("candidates.id"), nullable=False)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    scheduled_date: Mapped[date] = mapped_column(Date, nullable=False)
+    start_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    end_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    mode: Mapped[str] = mapped_column(String(20), default="onsite")  # online, onsite, phone
+    location: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), default="scheduled")  # scheduled, in_progress, completed, cancelled
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    candidate: Mapped["Candidate"] = relationship(back_populates="interview_rounds")
+    assignments: Mapped[list["InterviewAssignment"]] = relationship(back_populates="interview_round", cascade="all, delete-orphan")
+    evaluations: Mapped[list["Evaluation"]] = relationship(back_populates="interview_round", cascade="all, delete-orphan")
+
+
+class InterviewAssignment(Base):
+    __tablename__ = "interview_assignments"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    interview_round_id: Mapped[int] = mapped_column(Integer, ForeignKey("interview_rounds.id"), nullable=False)
+    employee_id: Mapped[int] = mapped_column(Integer, ForeignKey("employees.id"), nullable=False)
+
+    interview_round: Mapped["InterviewRound"] = relationship(back_populates="assignments")
+    employee: Mapped["Employee"] = relationship()
+
+
+class EvaluationCriterion(Base):
+    __tablename__ = "evaluation_criteria"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    weight: Mapped[float] = mapped_column(Float, default=1.0)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0)
+    is_active: Mapped[bool] = mapped_column(default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class Evaluation(Base):
+    __tablename__ = "evaluations"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    interview_round_id: Mapped[int] = mapped_column(Integer, ForeignKey("interview_rounds.id"), nullable=False)
+    interviewer_id: Mapped[int] = mapped_column(Integer, ForeignKey("employees.id"), nullable=False)
+    feedback: Mapped[str | None] = mapped_column(Text, nullable=True)
+    submitted_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    interview_round: Mapped["InterviewRound"] = relationship(back_populates="evaluations")
+    interviewer: Mapped["Employee"] = relationship()
+    scores: Mapped[list["EvaluationScore"]] = relationship(back_populates="evaluation", cascade="all, delete-orphan")
+
+
+class EvaluationScore(Base):
+    __tablename__ = "evaluation_scores"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    evaluation_id: Mapped[int] = mapped_column(Integer, ForeignKey("evaluations.id"), nullable=False)
+    criterion_id: Mapped[int] = mapped_column(Integer, ForeignKey("evaluation_criteria.id"), nullable=False)
+    score: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    evaluation: Mapped["Evaluation"] = relationship(back_populates="scores")
+    criterion: Mapped["EvaluationCriterion"] = relationship()
+
+
+class Offer(Base):
+    __tablename__ = "offers"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    candidate_id: Mapped[int] = mapped_column(Integer, ForeignKey("candidates.id"), nullable=False)
+    position_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("positions.id"), nullable=True)
+    base_salary: Mapped[float] = mapped_column(Float, default=0)
+    bonus: Mapped[float] = mapped_column(Float, default=0)
+    proposed_start_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    employment_type: Mapped[str] = mapped_column(String(30), default="full_time")  # full_time, contractor, intern
+    work_location: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    status: Mapped[str] = mapped_column(String(30), default="draft")  # draft, pending_approval, approved, sent, accepted, rejected, withdrawn
+    sent_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    responded_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    candidate: Mapped["Candidate"] = relationship(back_populates="offers")
+    position: Mapped["Position | None"] = relationship()

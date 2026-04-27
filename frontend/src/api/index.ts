@@ -192,16 +192,127 @@ export interface Candidate {
   stage: string
   source?: string
   notes?: string
+  employee_id?: number | null
+  current_stage_entered_at?: string
+  rejection_reason?: string
   position_title?: string
   owner_name?: string
+  employee_name?: string
   created_at: string
   updated_at: string
 }
 
-export type CandidatePayload = Partial<Omit<Candidate, 'id' | 'created_at' | 'updated_at' | 'position_title' | 'owner_name'>>
+export type CandidatePayload = Partial<Omit<Candidate, 'id' | 'created_at' | 'updated_at' | 'position_title' | 'owner_name' | 'employee_name'>>
 
 export const getCandidates = (params?: Record<string, unknown>): Promise<ListResponse<Candidate>> => api.get('/candidates', { params }).then(r => r.data)
 export const getCandidate = (id: number): Promise<Candidate> => api.get(`/candidates/${id}`).then(r => r.data)
 export const createCandidate = (data: CandidatePayload): Promise<Candidate> => api.post('/candidates', data).then(r => r.data)
 export const updateCandidate = (id: number, data: CandidatePayload): Promise<Candidate> => api.put(`/candidates/${id}`, data).then(r => r.data)
 export const deleteCandidate = (id: number): Promise<{ ok: boolean }> => api.delete(`/candidates/${id}`).then(r => r.data)
+export const updateCandidateStage = (id: number, data: { stage: string; reason?: string }): Promise<Candidate> => api.put(`/candidates/${id}/stage`, data).then(r => r.data)
+export const convertCandidate = (id: number): Promise<{ ok: boolean; employee_id: number }> => api.post(`/candidates/${id}/convert`).then(r => r.data)
+export const getCandidateDetail = (id: number): Promise<{
+  candidate: Candidate
+  interview_rounds: InterviewRound[]
+  evaluations: Evaluation[]
+  offers: Offer[]
+  overall_score: number
+}> => api.get(`/candidates/${id}/detail`).then(r => r.data)
+
+export interface InterviewRound {
+  id: number
+  candidate_id: number
+  title: string
+  scheduled_date: string
+  start_time: string
+  end_time: string
+  mode: string
+  location?: string
+  status: string
+  created_at: string
+  updated_at: string
+  interviewers: Array<{ id: number; name: string }>
+  average_score?: number
+}
+
+export const getInterviewRounds = (candidateId: number): Promise<ListResponse<InterviewRound>> => api.get(`/interviews/candidate/${candidateId}`).then(r => r.data)
+export const createInterviewRound = (candidateId: number, data: Partial<InterviewRound> & { interviewer_ids: number[] }): Promise<InterviewRound> => api.post(`/interviews/candidate/${candidateId}`, data).then(r => r.data)
+export const updateInterviewRound = (id: number, data: Partial<InterviewRound> & { interviewer_ids?: number[] }): Promise<InterviewRound> => api.put(`/interviews/${id}`, data).then(r => r.data)
+export const deleteInterviewRound = (id: number): Promise<{ ok: boolean }> => api.delete(`/interviews/${id}`).then(r => r.data)
+export const updateInterviewRoundStatus = (id: number, status: string): Promise<InterviewRound> => api.put(`/interviews/${id}/status`, null, { params: { status } }).then(r => r.data)
+export const getMyInterviews = (employeeId: number): Promise<ListResponse<InterviewRound>> => api.get(`/interviews/my/${employeeId}`).then(r => r.data)
+
+export interface EvaluationCriterion {
+  id: number
+  name: string
+  description?: string
+  weight: number
+  sort_order: number
+  is_active: boolean
+  created_at: string
+}
+
+export interface EvaluationScore {
+  id: number
+  evaluation_id: number
+  criterion_id: number
+  score: number
+  criterion_name: string
+  weight: number
+}
+
+export interface Evaluation {
+  id: number
+  interview_round_id: number
+  interviewer_id: number
+  interviewer_name: string
+  feedback?: string
+  submitted_at: string
+  scores: EvaluationScore[]
+  weighted_average: number
+}
+
+export const getEvaluationCriteria = (): Promise<ListResponse<EvaluationCriterion>> => api.get('/evaluations/criteria').then(r => r.data)
+export const createEvaluationCriterion = (data: Partial<EvaluationCriterion>): Promise<EvaluationCriterion> => api.post('/evaluations/criteria', data).then(r => r.data)
+export const updateEvaluationCriterion = (id: number, data: Partial<EvaluationCriterion>): Promise<EvaluationCriterion> => api.put(`/evaluations/criteria/${id}`, data).then(r => r.data)
+export const deleteEvaluationCriterion = (id: number): Promise<{ ok: boolean }> => api.delete(`/evaluations/criteria/${id}`).then(r => r.data)
+export const getEvaluations = (roundId: number): Promise<ListResponse<Evaluation>> => api.get(`/evaluations/round/${roundId}`).then(r => r.data)
+export const createEvaluation = (roundId: number, data: { scores: Array<{ criterion_id: number; score: number }>; feedback?: string; interviewer_id: number }): Promise<Evaluation> => api.post(`/evaluations/round/${roundId}`, data).then(r => r.data)
+
+export interface Offer {
+  id: number
+  candidate_id: number
+  position_id?: number | null
+  position_title?: string
+  base_salary: number
+  bonus: number
+  proposed_start_date?: string
+  employment_type: string
+  work_location?: string
+  status: string
+  sent_at?: string
+  responded_at?: string
+  notes?: string
+  created_at: string
+  updated_at: string
+}
+
+export const getOffers = (candidateId: number): Promise<ListResponse<Offer>> => api.get(`/offers/candidate/${candidateId}`).then(r => r.data)
+export const createOffer = (candidateId: number, data: Partial<Offer>): Promise<Offer> => api.post(`/offers/candidate/${candidateId}`, data).then(r => r.data)
+export const updateOffer = (id: number, data: Partial<Offer>): Promise<Offer> => api.put(`/offers/${id}`, data).then(r => r.data)
+export const updateOfferStatus = (id: number, data: { status: string; reason?: string }): Promise<Offer> => api.put(`/offers/${id}/status`, data).then(r => r.data)
+export const deleteOffer = (id: number): Promise<{ ok: boolean }> => api.delete(`/offers/${id}`).then(r => r.data)
+
+export interface RecruitingMetrics {
+  total_active_candidates: number
+  candidates_by_stage: Record<string, number>
+  avg_days_in_stage: number
+  upcoming_interviews_count: number
+  pending_evaluations_count: number
+  pending_hire_proposals_count: number
+  offer_acceptance_rate: number
+}
+
+export interface DashboardStatsWithRecruiting extends DashboardStats {
+  recruiting: RecruitingMetrics
+}

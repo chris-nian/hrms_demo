@@ -21,11 +21,18 @@ def reset_test_database():
     with engine.begin() as connection:
         connection.execute(text("PRAGMA foreign_keys=OFF"))
         for table in [
+            "evaluation_scores",
+            "evaluations",
+            "evaluation_criteria",
+            "interview_assignments",
+            "interview_rounds",
+            "offers",
             "approval_records",
             "approval_flows",
             "attendances",
             "salary_configs",
             "employees",
+            "candidates",
             "positions",
             "departments",
         ]:

@@ -47,6 +47,11 @@ def upgrade_sqlite_schema():
             "description": "TEXT",
             "headcount_plan": "INTEGER DEFAULT 0",
         },
+        "candidates": {
+            "employee_id": "INTEGER",
+            "current_stage_entered_at": "DATETIME",
+            "rejection_reason": "TEXT",
+        },
     }
 
     with engine.begin() as connection:

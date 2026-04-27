@@ -78,11 +78,22 @@ def _parse_positive_number(value, field: str, allow_zero: bool = False) -> float
     return number
 
 
-def _validate_content(flow_type: str, content: dict | None) -> dict:
+def _validate_content(flow_type: str, content: dict | None, db: Session) -> dict:
     content = content or {}
-    if flow_type not in {"leave", "salary_adjust", "other"}:
+    if flow_type not in {"leave", "salary_adjust", "hire_proposal", "other"}:
         raise HTTPException(400, "Invalid approval type")
-    if flow_type == "leave":
+    if flow_type == "hire_proposal":
+        candidate_id = content.get("candidate_id")
+        if not candidate_id:
+            raise HTTPException(400, "candidate_id is required for hire proposals")
+        from models import Candidate
+        candidate = db.query(Candidate).filter(Candidate.id == candidate_id).first()
+        if not candidate:
+            raise HTTPException(400, "Candidate not found")
+        content["candidate_id"] = int(candidate_id)
+        content["position_id"] = content.get("position_id")
+        content["proposed_hire_date"] = content.get("proposed_hire_date")
+    elif flow_type == "leave":
         start = content.get("start_date")
         end = content.get("end_date") or start
         if not start:
@@ -113,7 +124,10 @@ def _validate_content(flow_type: str, content: dict | None) -> dict:
 
 def _apply_side_effects(flow: ApprovalFlow, db: Session):
     content = flow.content or {}
-    if flow.type == "leave":
+    if flow.type == "hire_proposal":
+        from services.hiring_service import apply_hire_proposal_approval
+        apply_hire_proposal_approval(flow, db)
+    elif flow.type == "leave":
         start = content.get("start_date")
         end = content.get("end_date") or start
         if not start:
@@ -188,7 +202,7 @@ def create_approval(data: ApprovalFlowCreate, db: Session = Depends(get_db)):
     applicant = db.query(Employee).filter(Employee.id == data.applicant_id).first()
     if not applicant:
         raise HTTPException(404, "Applicant not found")
-    content = _validate_content(data.type, data.content)
+    content = _validate_content(data.type, data.content, db)
     manager = _manager_for(applicant, db)
     if not manager:
         raise HTTPException(400, "No manager available for approval")
@@ -266,6 +280,10 @@ def reject(flow_id: int, data: ApprovalAction, db: Session = Depends(get_db)):
     flow.state = "rejected"
     flow.current_approver_id = None
     flow.updated_at = datetime.utcnow()
+
+    if flow.type == "hire_proposal":
+        from services.hiring_service import apply_hire_proposal_rejection
+        apply_hire_proposal_rejection(flow, db)
 
     record = ApprovalRecord(
         flow_id=flow.id, approver_id=data.approver_id,

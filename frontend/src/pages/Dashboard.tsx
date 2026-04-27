@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { EmptyState, LoadingState, PageHeader, Panel, StatCard } from '@/components/ui'
-import { getDashboardStats, type ApprovalItem, type DashboardStats } from '@/api/index'
+import { getDashboardStats, type ApprovalItem, type DashboardStats, type RecruitingMetrics } from '@/api/index'
 
 const stateClasses: Record<string, string> = {
   draft: 'bg-slate-100 text-slate-700',
@@ -23,7 +23,7 @@ function stateKey(state: string) {
 export default function Dashboard() {
   const { t, i18n } = useTranslation()
   const isZh = i18n.language === 'zh'
-  const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [stats, setStats] = useState<DashboardStats & { recruiting?: RecruitingMetrics } | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -57,6 +57,37 @@ export default function Dashboard() {
         <StatCard label={t('dashboard.contracts30')} value={stats?.contracts_expiring_30 ?? 0} hint={t('dashboard.contractsHint')} tone="rose" />
         <StatCard label={t('dashboard.salaryCoverage')} value={`${stats?.salary_config_coverage?.toFixed(1) ?? '0.0'}%`} hint={t('dashboard.salaryCoverageHint')} tone="green" />
       </section>
+
+      {/* Recruiting Metrics */}
+      {stats?.recruiting && (
+        <>
+          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <StatCard label={t('recruiting.totalCandidates')} value={stats.recruiting.total_active_candidates} tone="blue" />
+            <StatCard label={t('recruiting.interviews')} value={stats.recruiting.upcoming_interviews_count} tone="amber" />
+            <StatCard label={t('recruiting.evaluations')} value={stats.recruiting.pending_evaluations_count} tone="slate" />
+            <StatCard label={t('recruiting.offerStatus')} value={`${stats.recruiting.offer_acceptance_rate}%`} tone="green" />
+          </section>
+
+          <Panel title={t('recruiting.title')} description="">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <div className="info-cell"><span>Active Candidates</span><strong>{stats.recruiting.total_active_candidates}</strong></div>
+              <div className="info-cell"><span>Avg Days in Stage</span><strong>{stats.recruiting.avg_days_in_stage}</strong></div>
+              <div className="info-cell"><span>Upcoming Interviews</span><strong>{stats.recruiting.upcoming_interviews_count}</strong></div>
+              <div className="info-cell"><span>Pending Evaluations</span><strong>{stats.recruiting.pending_evaluations_count}</strong></div>
+              <div className="info-cell"><span>Pending Hire Proposals</span><strong>{stats.recruiting.pending_hire_proposals_count}</strong></div>
+              <div className="info-cell"><span>Offer Acceptance Rate</span><strong>{stats.recruiting.offer_acceptance_rate}%</strong></div>
+            </div>
+            <div className="mt-4 space-y-3">
+              <h4 className="text-sm font-semibold">Candidates by Stage</h4>
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(stats.recruiting.candidates_by_stage || {}).map(([stage, count]) => (
+                  <span key={stage} className="pill text-xs">{stage}: {count as number}</span>
+                ))}
+              </div>
+            </div>
+          </Panel>
+        </>
+      )}
 
       <div className="grid gap-5 xl:grid-cols-[1fr_0.9fr]">
         <Panel title={t('dashboard.departmentDistribution')} description={t('dashboard.departmentDistributionDescription')}>

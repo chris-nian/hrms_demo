@@ -194,6 +194,17 @@ class ApprovalFlowOut(BaseModel):
         from_attributes = True
 
 
+# ─── Dashboard Recruiting Metrics ───
+class RecruitingMetrics(BaseModel):
+    total_active_candidates: int = 0
+    candidates_by_stage: dict = {}
+    avg_days_in_stage: float = 0.0
+    upcoming_interviews_count: int = 0
+    pending_evaluations_count: int = 0
+    pending_hire_proposals_count: int = 0
+    offer_acceptance_rate: float = 0.0
+
+
 # ─── Dashboard ───
 class DashboardStats(BaseModel):
     total_employees: int
@@ -209,7 +220,7 @@ class DashboardStats(BaseModel):
     salary_config_coverage: float
     department_distribution: list[dict]
     recent_approvals: list[ApprovalFlowOut]
-
+    recruiting: Optional[RecruitingMetrics] = None
 
 # ─── Candidate ───
 class CandidateBase(BaseModel):
@@ -232,8 +243,195 @@ class CandidateOut(CandidateBase):
     id: int
     created_at: datetime
     updated_at: datetime
+    employee_id: Optional[int] = None
+    current_stage_entered_at: Optional[datetime] = None
+    rejection_reason: Optional[str] = None
     position_title: str = ""
     owner_name: str = ""
+    employee_name: str = ""
 
     class Config:
         from_attributes = True
+
+
+class CandidateStageUpdate(BaseModel):
+    stage: str
+    reason: Optional[str] = None
+
+
+# ─── Interview Round ───
+class InterviewRoundBase(BaseModel):
+    candidate_id: int
+    title: str
+    scheduled_date: date
+    start_time: datetime
+    end_time: datetime
+    mode: str = "onsite"
+    location: Optional[str] = None
+    status: str = "scheduled"
+
+class InterviewRoundCreate(BaseModel):
+    title: str
+    scheduled_date: date
+    start_time: datetime
+    end_time: datetime
+    mode: str = "onsite"
+    location: Optional[str] = None
+    interviewer_ids: list[int] = []
+
+class InterviewRoundUpdate(BaseModel):
+    title: Optional[str] = None
+    scheduled_date: Optional[date] = None
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    mode: Optional[str] = None
+    location: Optional[str] = None
+    interviewer_ids: Optional[list[int]] = None
+
+class InterviewRoundOut(BaseModel):
+    id: int
+    candidate_id: int
+    title: str
+    scheduled_date: date
+    start_time: datetime
+    end_time: datetime
+    mode: str
+    location: Optional[str] = None
+    status: str
+    created_at: datetime
+    updated_at: datetime
+    interviewers: list[dict] = []
+
+    class Config:
+        from_attributes = True
+
+
+# ─── Interview Assignment ───
+class InterviewAssignmentOut(BaseModel):
+    id: int
+    interview_round_id: int
+    employee_id: int
+    employee_name: str = ""
+
+    class Config:
+        from_attributes = True
+
+
+# ─── Evaluation Criterion ───
+class EvaluationCriterionBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+    weight: float = 1.0
+    sort_order: int = 0
+    is_active: bool = True
+
+class EvaluationCriterionCreate(EvaluationCriterionBase):
+    pass
+
+class EvaluationCriterionUpdate(EvaluationCriterionBase):
+    pass
+
+class EvaluationCriterionOut(EvaluationCriterionBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# ─── Evaluation ───
+class EvaluationScoreBase(BaseModel):
+    criterion_id: int
+    score: int
+
+class EvaluationScoreOut(EvaluationScoreBase):
+    id: int
+    evaluation_id: int
+    criterion_name: str = ""
+    weight: float = 1.0
+
+    class Config:
+        from_attributes = True
+
+class EvaluationBase(BaseModel):
+    interview_round_id: int
+    interviewer_id: int
+    feedback: Optional[str] = None
+
+class EvaluationCreate(BaseModel):
+    scores: list[EvaluationScoreBase]
+    feedback: Optional[str] = None
+    interviewer_id: int
+
+class EvaluationOut(BaseModel):
+    id: int
+    interview_round_id: int
+    interviewer_id: int
+    interviewer_name: str = ""
+    feedback: Optional[str] = None
+    submitted_at: datetime
+    scores: list[EvaluationScoreOut] = []
+    weighted_average: float = 0.0
+
+    class Config:
+        from_attributes = True
+
+
+# ─── Offer ───
+class OfferBase(BaseModel):
+    candidate_id: int
+    position_id: Optional[int] = None
+    base_salary: float = 0
+    bonus: float = 0
+    proposed_start_date: Optional[date] = None
+    employment_type: str = "full_time"
+    work_location: Optional[str] = None
+    status: str = "draft"
+    notes: Optional[str] = None
+
+class OfferCreate(BaseModel):
+    position_id: Optional[int] = None
+    base_salary: float = 0
+    bonus: float = 0
+    proposed_start_date: Optional[date] = None
+    employment_type: str = "full_time"
+    work_location: Optional[str] = None
+    notes: Optional[str] = None
+
+class OfferUpdate(BaseModel):
+    position_id: Optional[int] = None
+    base_salary: Optional[float] = None
+    bonus: Optional[float] = None
+    proposed_start_date: Optional[date] = None
+    employment_type: Optional[str] = None
+    work_location: Optional[str] = None
+    notes: Optional[str] = None
+
+class OfferOut(BaseModel):
+    id: int
+    candidate_id: int
+    position_id: Optional[int] = None
+    position_title: str = ""
+    base_salary: float = 0
+    bonus: float = 0
+    proposed_start_date: Optional[date] = None
+    employment_type: str = "full_time"
+    work_location: Optional[str] = None
+    status: str = "draft"
+    sent_at: Optional[datetime] = None
+    responded_at: Optional[datetime] = None
+    notes: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class OfferStatusUpdate(BaseModel):
+    status: str
+    reason: Optional[str] = None
+
+
+
+

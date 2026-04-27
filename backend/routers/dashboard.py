@@ -1,10 +1,13 @@
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from fastapi import APIRouter, Depends
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from database import get_db
-from models import Employee, Department, Position, ApprovalFlow, Attendance, SalaryConfig
-from schemas import DashboardStats
+from models import (
+    Employee, Department, Position, ApprovalFlow, Attendance, SalaryConfig,
+    Candidate, InterviewRound, Evaluation, Offer, InterviewAssignment,
+)
+from schemas import DashboardStats, RecruitingMetrics
 
 router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
 
@@ -78,6 +81,57 @@ def get_stats(db: Session = Depends(get_db)):
             records=records,
         ))
 
+    # ─── Recruiting Metrics ───
+    total_active_candidates = db.query(Candidate).filter(
+        Candidate.stage.notin_(["hired", "rejected", "withdrawn"])
+    ).count()
+
+    candidates_by_stage = {}
+    for stage in ["new", "screening", "phone_interview", "onsite_interview", "evaluation", "offer_pending", "offer_sent", "offer_accepted", "hired", "rejected", "withdrawn"]:
+        candidates_by_stage[stage] = db.query(Candidate).filter(Candidate.stage == stage).count()
+
+    # Average days in current stage
+    stage_durations = []
+    for c in db.query(Candidate).filter(Candidate.current_stage_entered_at.isnot(None)).all():
+        days = (datetime.utcnow() - c.current_stage_entered_at).days
+        stage_durations.append(days)
+    avg_days_in_stage = round(sum(stage_durations) / len(stage_durations), 1) if stage_durations else 0.0
+
+    upcoming_interviews_count = db.query(InterviewRound).filter(
+        InterviewRound.scheduled_date >= today,
+        InterviewRound.status == "scheduled",
+    ).count()
+
+    # Pending evaluations = completed rounds without all assigned evals submitted
+    pending_evals = 0
+    for r in db.query(InterviewRound).filter(InterviewRound.status == "completed").all():
+        assignment_count = db.query(func.count()).filter(
+            InterviewRound.id == r.id
+        ).select_from(InterviewRound).join(InterviewRound.assignments).scalar() or 0
+        eval_count = db.query(Evaluation).filter(Evaluation.interview_round_id == r.id).count()
+        if eval_count < assignment_count:
+            pending_evals += 1
+    pending_evaluations_count = pending_evals
+
+    pending_hire_proposals_count = db.query(ApprovalFlow).filter(
+        ApprovalFlow.type == "hire_proposal",
+        ApprovalFlow.state.in_(["pending_manager", "pending_hr"]),
+    ).count()
+
+    sent_offers = db.query(Offer).filter(Offer.status.in_(["sent", "accepted", "rejected"])).count()
+    accepted_offers = db.query(Offer).filter(Offer.status == "accepted").count()
+    offer_acceptance_rate = round(accepted_offers / sent_offers * 100, 1) if sent_offers > 0 else 0.0
+
+    recruiting = RecruitingMetrics(
+        total_active_candidates=total_active_candidates,
+        candidates_by_stage=candidates_by_stage,
+        avg_days_in_stage=avg_days_in_stage,
+        upcoming_interviews_count=upcoming_interviews_count,
+        pending_evaluations_count=pending_evaluations_count,
+        pending_hire_proposals_count=pending_hire_proposals_count,
+        offer_acceptance_rate=offer_acceptance_rate,
+    )
+
     return DashboardStats(
         total_employees=total_employees,
         active_employees=active_employees,
@@ -92,4 +146,7 @@ def get_stats(db: Session = Depends(get_db)):
         salary_config_coverage=salary_config_coverage,
         department_distribution=department_distribution,
         recent_approvals=recent_approvals,
+        recruiting=recruiting,
     )
+
+
